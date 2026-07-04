@@ -1,0 +1,22 @@
+# Render 部署設定（Static Site）
+# 喺 Render 撳 New → Blueprint，揀呢個 repo，佢就會自動照住呢個檔設定。
+services:
+  - type: web
+    name: aura-sonica
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    # HashRouter 已經唔使 server rewrite，但保留一條 fallback 都無妨
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      # Page 6 留言自動寄信（可選）。喺 Render dashboard 填返真 key 就會自動寄，
+      # 唔填就用 mailto 後備，一樣 work。
+      - key: VITE_EMAILJS_SERVICE_ID
+        sync: false
+      - key: VITE_EMAILJS_TEMPLATE_ID
+        sync: false
+      - key: VITE_EMAILJS_PUBLIC_KEY
+        sync: false
