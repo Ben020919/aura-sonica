@@ -11,12 +11,5 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
-    envVars:
-      # Page 6 留言自動寄信（可選）。喺 Render dashboard 填返真 key 就會自動寄，
-      # 唔填就用 mailto 後備，一樣 work。
-      - key: VITE_EMAILJS_SERVICE_ID
-        sync: false
-      - key: VITE_EMAILJS_TEMPLATE_ID
-        sync: false
-      - key: VITE_EMAILJS_PUBLIC_KEY
-        sync: false
+# 補充：Page 6 留言想自動寄信，之後喺 Render dashboard 個 Environment
+# 加返 VITE_EMAILJS_SERVICE_ID / _TEMPLATE_ID / _PUBLIC_KEY 就得（唔加就用 mailto 後備）。
