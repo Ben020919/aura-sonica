@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import Reveal from '../components/Reveal.jsx'
 import MagDecor from '../components/MagDecor.jsx'
 
-// 關於：左邊 full 圖，右邊全部係字。
+// 關於：左邊 full 圖，右邊全部係字。圖同文字同一時間一齊淡入升起。
 export default function About() {
   return (
     <section className="page clean-page">
@@ -11,30 +11,30 @@ export default function About() {
           className="photo-full"
           initial={{ opacity: 0, scale: 1.04 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.9, delay: 0, ease: [0.22, 1, 0.36, 1] }}
         >
           <img src="/products/11.jpeg" alt="Listen to the wave within" />
         </motion.div>
 
         <div className="text-side">
           <MagDecor variant="about" />
-          <Reveal>
+          <Reveal delay={0}>
             <div className="kicker">A Study in Softness</div>
           </Reveal>
-          <Reveal delay={0.1}>
+          <Reveal delay={0}>
             <h1 className="clean-title">Aura_Sonica</h1>
           </Reveal>
-          <Reveal delay={0.18}>
+          <Reveal delay={0}>
             <div className="rule" />
           </Reveal>
-          <Reveal delay={0.24}>
+          <Reveal delay={0}>
             <p className="drop">
               是分享情緒療癒、自我成長、
               <br />
               美學生活與精神探索的品牌。
             </p>
           </Reveal>
-          <Reveal delay={0.34}>
+          <Reveal delay={0}>
             <p>
               連結同頻的靈魂，
               <br />
@@ -45,7 +45,7 @@ export default function About() {
               ——你只需要記得，你本來就是光。
             </p>
           </Reveal>
-          <Reveal delay={0.44}>
+          <Reveal delay={0}>
             <p className="en">
               A brand sharing emotional healing, self-growth
               <br />
@@ -54,7 +54,7 @@ export default function About() {
               —accompanying everyone who is becoming their own light.
             </p>
           </Reveal>
-          <Reveal delay={0.52}>
+          <Reveal delay={0}>
             <div className="sign">— AURA_Sonica</div>
           </Reveal>
         </div>
