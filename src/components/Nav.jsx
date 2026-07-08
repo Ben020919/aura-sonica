@@ -21,7 +21,6 @@ export default function Nav({ onSearch, onFavorites, onAuth }) {
       <div className="denim-bar">
         <NavLink to="/" className="brand">
           AURA<span style={{ color: '#c7d5ea' }}>_</span>Sonica
-          <small>AU · SO ·</small>
         </NavLink>
 
         <div className="nav-actions">

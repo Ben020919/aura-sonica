@@ -25,7 +25,7 @@ export default function Shop() {
             </div>
           </Reveal>
           <Reveal delay={0.15}>
-            <h2>Aura 的貝殼小店</h2>
+            <h2>Aura Sonica@Store</h2>
           </Reveal>
           <Reveal delay={0.3}>
             <p

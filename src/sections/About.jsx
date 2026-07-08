@@ -29,25 +29,33 @@ export default function About() {
           </Reveal>
           <Reveal delay={0.24}>
             <p className="drop">
-              是分享情緒療癒、自我成長、美學生活與精神探索的品牌。
+              是分享情緒療癒、自我成長、
+              <br />
+              美學生活與精神探索的品牌。
             </p>
           </Reveal>
           <Reveal delay={0.34}>
             <p>
-              連結同頻的靈魂，陪伴每一個正在尋找自己、
-              正在成為自己的光的人。在這片忘聲海裡，
-              你不需要用力發光——你只需要記得，你本來就是光。
+              連結同頻的靈魂，
+              <br />
+              陪伴每一個正在尋找自己、正在成為自己的光的人。
+              <br />
+              在這片忘聲海裡，你不需要用力發光
+              <br />
+              ——你只需要記得，你本來就是光。
             </p>
           </Reveal>
           <Reveal delay={0.44}>
             <p className="en">
-              A brand sharing emotional healing, self-growth and quiet
-              spiritual exploration — accompanying everyone who is becoming
-              their own light.
+              A brand sharing emotional healing, self-growth
+              <br />
+              and quiet spiritual exploration
+              <br />
+              —accompanying everyone who is becoming their own light.
             </p>
           </Reveal>
           <Reveal delay={0.52}>
-            <div className="sign">— AURA_Sonica · AU · SO ·</div>
+            <div className="sign">— AURA_Sonica</div>
           </Reveal>
         </div>
       </div>

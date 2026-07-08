@@ -24,13 +24,19 @@ export default function Character() {
           <Reveal delay={0.34}>
             <p>
               收集每一個沒說出口的聲音，把它們釀成一顆一顆的珍珠。
-              她不說話，只是靜靜聽——聽你今天，過得好不好。
+              <br />
+              她不說話，只是靜靜聽——
+              <br />
+              聽你今天，過得好不好。
             </p>
           </Reveal>
           <Reveal delay={0.44}>
             <p className="en">
-              She lives in the deepest shell of the silent sea, gathering
-              every word left unspoken and turning them, slowly, into pearls.
+              She lives in the deepest shell of the silent sea,
+              <br />
+              gathering every word left unspoken and turning them,
+              <br />
+              slowly, into pearls.
             </p>
           </Reveal>
         </div>

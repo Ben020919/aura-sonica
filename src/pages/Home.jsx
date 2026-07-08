@@ -25,9 +25,9 @@ function Footer() {
       <div className="brand">AURA_Sonica</div>
       <div className="tagline">Listen , to the wave within</div>
       <div className="small">
-        原創 IP Aura · 情緒療癒 · 自我成長
+        原創 IP · 情緒療癒 · 自我成長
         <br />
-        © {new Date().getFullYear()} AURA_Sonica · AU · SO ·
+        © {new Date().getFullYear()} AURA_Sonica
       </div>
     </footer>
   )

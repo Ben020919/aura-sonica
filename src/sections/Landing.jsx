@@ -77,9 +77,9 @@ export default function Landing() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, delay: 0.9 }}
         >
-          原創 IP Aura · 情緒療癒 · 自我成長
+          原創 IP · 情緒療癒 · 自我成長
           <br />
-          Original IP Aura · Emotional Healing · Self Growth
+          Original IP · Emotional Healing · Self Growth
         </motion.div>
 
         <motion.button
