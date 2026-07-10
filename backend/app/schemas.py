@@ -20,6 +20,15 @@ class NoteIn(BaseModel):
     message: str = Field(min_length=1)
 
 
+class NoteOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    nickname: str | None = None
+    message: str
+    created_at: datetime
+
+
 class ProductOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

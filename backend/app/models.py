@@ -152,3 +152,14 @@ class Image(Base):
     data = Column(LargeBinary, nullable=False)
     content_type = Column(String(50), default="image/jpeg", nullable=False)
     created_at = Column(DateTime, default=_utcnow, nullable=False)
+
+
+class Note(Base):
+    """首頁「留言」—— 客人留低嘅說話，除咗 email 畀 Venus，亦存低畀後台睇返。"""
+
+    __tablename__ = "notes"
+
+    id = Column(Integer, primary_key=True)
+    nickname = Column(String(120))  # 客人簡稱，可為空
+    message = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=_utcnow, nullable=False)

@@ -243,3 +243,10 @@ def delete_category(cat_id: int, db: Session = Depends(get_db)):
     db.delete(cat)
     db.commit()
     return {"ok": True}
+
+
+# ── 留言 ────────────────────────────────────
+@router.get("/notes", response_model=list[schemas.NoteOut])
+def all_notes(db: Session = Depends(get_db)):
+    """後台睇客人留言（最新喺上）。"""
+    return db.query(models.Note).order_by(models.Note.created_at.desc()).all()

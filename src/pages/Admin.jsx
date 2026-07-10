@@ -75,9 +75,21 @@ export default function Admin() {
         >
           商品
         </button>
+        <button
+          className={tab === 'notes' ? 'active' : ''}
+          onClick={() => setTab('notes')}
+        >
+          留言
+        </button>
       </div>
 
-      {tab === 'orders' ? <OrdersPanel /> : <ProductsPanel />}
+      {tab === 'orders' ? (
+        <OrdersPanel />
+      ) : tab === 'products' ? (
+        <ProductsPanel />
+      ) : (
+        <NotesPanel />
+      )}
     </div>
   )
 }
@@ -365,6 +377,49 @@ function OrdersPanel() {
           </table>
         </div>
       )}
+    </>
+  )
+}
+
+function NotesPanel() {
+  const [notes, setNotes] = useState(null)
+  const [err, setErr] = useState('')
+
+  useEffect(() => {
+    api('/api/admin/notes').then(setNotes).catch((e) => setErr(e.message))
+  }, [])
+
+  if (err) return <p className="admin-err">{err}</p>
+  if (!notes) return <p className="muted">載入中…</p>
+  if (!notes.length) return <p className="muted">仲未有留言。</p>
+
+  return (
+    <>
+      <div className="admin-bar">
+        <span className="muted">{notes.length} 則留言</span>
+      </div>
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>時間</th>
+              <th>簡稱</th>
+              <th>留言</th>
+            </tr>
+          </thead>
+          <tbody>
+            {notes.map((n) => (
+              <tr key={n.id}>
+                <td style={{ whiteSpace: 'nowrap' }}>
+                  <small>{new Date(n.created_at).toLocaleString('zh-HK')}</small>
+                </td>
+                <td>{n.nickname || '—'}</td>
+                <td style={{ whiteSpace: 'pre-wrap' }}>{n.message}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   )
 }
