@@ -373,3 +373,17 @@ def format_password_reset(user, code: str) -> tuple[str, str, str]:
 </div>
 <p style="margin:0;text-align:center;color:#9fb2b6;font-size:13px;line-height:1.7;">15 分鐘內有效 · 唔係你申請可以忽略呢封 email</p>"""
     return subject, "\n".join(tlines), _email_html(inner)
+
+
+def format_note(alias: str, message: str) -> tuple[str, str, str]:
+    """首頁留言 → 通知 Venus。"""
+    subject = f"🐚 AURA_Sonica 留言 — 來自 {alias}"
+    text = f"簡稱：{alias}\n\n{message}\n\n— 由 AURA_Sonica 送出"
+    inner = f"""\
+<p style="margin:0 0 20px;font-size:16px;"><b style="color:#1f4a54;">💌 有人留低咗一句說話</b></p>
+<div style="background:#f6fafb;border-radius:12px;padding:14px 18px;margin:0 0 20px;">
+  <span style="color:#9fb2b6;font-size:13px;">簡稱</span><br>
+  <span style="font-size:16px;font-weight:600;color:#1f4a54;">{esc(alias)}</span>
+</div>
+<div style="white-space:pre-wrap;line-height:1.95;color:#3a4d51;font-size:15px;">{esc(message)}</div>"""
+    return subject, text, _email_html(inner)

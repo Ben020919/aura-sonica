@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from .. import models, schemas
 from ..config import settings
 from ..database import get_db
-from ..notifications import send_email
+from ..notifications import format_note, send_email
 
 router = APIRouter(prefix="/api", tags=["products"])
 
@@ -13,9 +13,8 @@ router = APIRouter(prefix="/api", tags=["products"])
 def leave_note(payload: schemas.NoteIn, background: BackgroundTasks):
     """首頁「留言」→ email 去 Venus（用後端 SMTP）。"""
     alias = (payload.nickname or "一位路過的旅人").strip()
-    subject = f"🐚 AURA_Sonica 留言 — 來自 {alias}"
-    body = f"簡稱：{alias}\n\n{payload.message.strip()}\n\n— 由 AURA_Sonica 送出"
-    background.add_task(send_email, settings.notify_email, subject, body)
+    subject, text, html = format_note(alias, payload.message.strip())
+    background.add_task(send_email, settings.notify_email, subject, text, html)
     return {"ok": True}
 
 
