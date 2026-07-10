@@ -164,14 +164,28 @@ function OrdersPanel() {
   }, [])
 
   async function change(id, field, value) {
-    try {
-      const updated = await api('/api/admin/orders/' + id, {
-        method: 'PATCH',
-        body: { [field]: value },
-      })
-      setOrders((os) => os.map((o) => (o.id === id ? updated : o)))
-    } catch (e) {
-      alert(e.message)
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const updated = await api('/api/admin/orders/' + id, {
+          method: 'PATCH',
+          body: { [field]: value },
+        })
+        setOrders((os) => os.map((o) => (o.id === id ? updated : o)))
+        return
+      } catch (e) {
+        // 後端可能啱 redeploy → 網絡錯誤自動重試一次
+        const transient = /failed to fetch|networkerror|load failed/i.test(e.message || '')
+        if (transient && attempt === 0) {
+          await new Promise((r) => setTimeout(r, 1500))
+          continue
+        }
+        alert(
+          transient
+            ? '連線唔到伺服器（後端可能啱啱更新緊）。等一兩分鐘，撳「↻ 更新」再試。'
+            : e.message,
+        )
+        return
+      }
     }
   }
 
