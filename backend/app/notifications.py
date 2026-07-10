@@ -1,5 +1,8 @@
+import json
 import smtplib
 import socket
+import urllib.error
+import urllib.request
 from email.message import EmailMessage
 
 from .config import settings
@@ -50,11 +53,51 @@ def format_order_email(order) -> tuple[str, str]:
 
 
 def send_email(to: str, subject: str, body: str) -> None:
-    """寄信。未配置 SMTP 就只 log（永不 raise，唔會搞爛落單）。"""
-    if not settings.smtp_host or not settings.smtp_user:
-        print("[notify] SMTP 未配置，唔會寄信。內容如下：")
+    """寄信。優先 Brevo HTTP API（雲端唔會封）→ 否則 SMTP（本機）→ 都冇就 log。
+    永不 raise，唔會搞爛落單。"""
+    if settings.brevo_api_key:
+        _send_via_brevo(to, subject, body)
+    elif settings.smtp_host and settings.smtp_user:
+        _send_via_smtp(to, subject, body)
+    else:
+        print("[notify] 未配置 email（Brevo / SMTP 都冇），唔會寄信。內容如下：")
         print(f"  To: {to}\n  Subject: {subject}\n{body}")
-        return
+
+
+def _send_via_brevo(to: str, subject: str, body: str) -> None:
+    sender = settings.smtp_from or settings.smtp_user or settings.notify_email
+    payload = {
+        "sender": {"email": sender, "name": "AURA_Sonica"},
+        "to": [{"email": to}],
+        "subject": subject,
+        "textContent": body,
+    }
+    try:
+        req = urllib.request.Request(
+            "https://api.brevo.com/v3/smtp/email",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "api-key": settings.brevo_api_key,
+                "content-type": "application/json",
+                "accept": "application/json",
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            resp.read()
+        print(f"[notify] 已寄通知去 {to}：{subject}（Brevo）")
+    except urllib.error.HTTPError as e:  # noqa: BLE001
+        detail = ""
+        try:
+            detail = e.read().decode("utf-8")
+        except Exception:  # noqa: BLE001
+            pass
+        print(f"[notify] Brevo 寄信失敗（HTTP {e.code}）：{detail}")
+    except Exception as e:  # noqa: BLE001
+        print(f"[notify] Brevo 寄信失敗：{e}")
+
+
+def _send_via_smtp(to: str, subject: str, body: str) -> None:
     try:
         msg = EmailMessage()
         msg["Subject"] = subject

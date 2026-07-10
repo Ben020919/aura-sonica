@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     smtp_from: str = ""
     notify_email: str = "VENUSLEUNG412@GMAIL.COM"  # 收下單通知嘅人（Venus）
 
+    # Brevo HTTP email API —— Render 封咗 SMTP，雲端要用呢個經 HTTPS 寄信。
+    # 有填 key 就優先用 Brevo；否則試 SMTP（本機用）；都冇就只 log。
+    brevo_api_key: str = ""
+
     # 運費（HKD，flat；0 = 免運費）
     shipping_fee: float = 0
 
