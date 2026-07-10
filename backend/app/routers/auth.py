@@ -67,8 +67,8 @@ def forgot_password(
         user.reset_code = code
         user.reset_expires = datetime.now(timezone.utc) + timedelta(minutes=15)
         db.commit()
-        subject, body = format_password_reset(user, code)
-        background.add_task(send_email, user.email, subject, body)
+        subject, text, html = format_password_reset(user, code)
+        background.add_task(send_email, user.email, subject, text, html)
     # 唔透露 email 存唔存在（安全）
     return {"ok": True, "message": "如果呢個 email 有帳戶,驗證碼已寄出。"}
 
@@ -85,6 +85,11 @@ def reset_password(payload: schemas.ResetRequest, db: Session = Depends(get_db))
             exp = exp.replace(tzinfo=timezone.utc)
         if datetime.now(timezone.utc) > exp:
             raise HTTPException(status_code=400, detail="驗證碼已過期,請重新申請")
+    # 唔准用返舊密碼（同現有密碼一樣就拒絕）
+    if verify_password(payload.password, user.password_hash):
+        raise HTTPException(
+            status_code=400, detail="新密碼唔可以同舊密碼一樣，請設一個新密碼"
+        )
     user.password_hash = hash_password(payload.password)
     user.reset_code = None
     user.reset_expires = None

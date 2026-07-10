@@ -92,13 +92,13 @@ def create_order(
     db.refresh(order)
 
     # 背景寄通知（唔阻住回應；寄唔到都唔影響落單）
-    subject, body = format_order_email(order)
-    background.add_task(send_email, settings.notify_email, subject, body)
+    subject, text, html = format_order_email(order)
+    background.add_task(send_email, settings.notify_email, subject, text, html)
 
     # 客人確認信（有留 email 先寄）
     if order.contact_email:
-        c_subject, c_body = format_customer_confirmation(order)
-        background.add_task(send_email, order.contact_email, c_subject, c_body)
+        c_subject, c_text, c_html = format_customer_confirmation(order)
+        background.add_task(send_email, order.contact_email, c_subject, c_text, c_html)
 
     return order
 
@@ -153,11 +153,11 @@ def request_return(
     db.commit()
     db.refresh(order)
     # 通知 Venus + 覆客人
-    s, b = format_return_received_admin(order)
-    background.add_task(send_email, settings.notify_email, s, b)
+    s, st, sh = format_return_received_admin(order)
+    background.add_task(send_email, settings.notify_email, s, st, sh)
     if order.contact_email:
-        cs, cb = format_return_customer(order)
-        background.add_task(send_email, order.contact_email, cs, cb)
+        cs, ct, ch = format_return_customer(order)
+        background.add_task(send_email, order.contact_email, cs, ct, ch)
     return order
 
 

@@ -17,13 +17,13 @@ export async function sendNote({ nickname, message }) {
 // mailto 後備：整理好主旨同內文，打開訪客郵件 app 寄去 Venus。
 export function buildMailto({ nickname, message }) {
   const alias = (nickname || '一位路過的旅人').trim()
-  const subject = `🐚 忘聲海留言 — 來自 ${alias}`
+  const subject = `🐚 AURA_Sonica 留言 — 來自 ${alias}`
   const lines = [
     `簡稱：${alias}`,
     '',
     message || '',
     '',
-    '— 由 AURA_Sonica 忘聲海送出',
+    '— 由 AURA_Sonica 送出',
   ]
   return `mailto:${RECIPIENT}?subject=${encodeURIComponent(
     subject,

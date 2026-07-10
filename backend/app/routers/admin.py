@@ -92,11 +92,11 @@ def update_order(
     db.refresh(order)
     # 有留 email 先寄：訂單狀態變 → 通知；退貨狀態變 → 通知
     if status_changed and order.contact_email:
-        subject, body = format_status_update(order)
-        background.add_task(send_email, order.contact_email, subject, body)
+        subject, text, html = format_status_update(order)
+        background.add_task(send_email, order.contact_email, subject, text, html)
     if return_changed and order.contact_email:
-        subject, body = format_return_customer(order)
-        background.add_task(send_email, order.contact_email, subject, body)
+        subject, text, html = format_return_customer(order)
+        background.add_task(send_email, order.contact_email, subject, text, html)
     return order
 
 
