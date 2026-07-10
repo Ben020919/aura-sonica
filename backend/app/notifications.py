@@ -1,7 +1,21 @@
 import smtplib
+import socket
 from email.message import EmailMessage
 
 from .config import settings
+
+# Render / 雲容器解 smtp.gmail.com 常會攞到 IPv6，但容器多數冇 IPv6 路由，
+# 一連就 [Errno 101] Network is unreachable。強制 DNS 只回 IPv4 就連得到。
+_orig_getaddrinfo = socket.getaddrinfo
+
+
+def _ipv4_only_getaddrinfo(*args, **kwargs):
+    res = _orig_getaddrinfo(*args, **kwargs)
+    ipv4 = [r for r in res if r[0] == socket.AF_INET]
+    return ipv4 or res  # 冇 IPv4 就用返原本，唔會搞爛其他連線
+
+
+socket.getaddrinfo = _ipv4_only_getaddrinfo
 
 
 def format_order_email(order) -> tuple[str, str]:
@@ -47,7 +61,7 @@ def send_email(to: str, subject: str, body: str) -> None:
         msg["From"] = settings.smtp_from or settings.smtp_user
         msg["To"] = to
         msg.set_content(body)
-        with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as s:
+        with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=20) as s:
             s.starttls()
             s.login(settings.smtp_user, settings.smtp_password)
             s.send_message(msg)
