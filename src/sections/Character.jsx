@@ -45,7 +45,8 @@ export default function Character() {
         <motion.div
           className="photo-full"
           initial={{ opacity: 0, scale: 1.04 }}
-          animate={{ opacity: 1, scale: 1 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, amount: 0.25 }}
           transition={{ duration: 0.9, delay: 0, ease: [0.22, 1, 0.36, 1] }}
         >
           <img src="/products/12.jpeg" alt="Aura — 原創 IP 角色" />
