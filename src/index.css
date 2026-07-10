@@ -593,6 +593,60 @@ a {
   align-items: flex-start;
   min-height: calc(100vh - 60px);
 }
+/* 長內容頁（我的訂單 / 政策 / FAQ）：由頂開始，唔好垂直置中 */
+.page.doc-page {
+  align-items: flex-start;
+}
+.page.doc-page .section-inner {
+  width: 100%;
+  margin: 0 auto;
+}
+.pill-action {
+  padding: 0.42em 1.05em;
+  border-radius: 999px;
+  border: 1px solid rgba(127, 169, 214, 0.5);
+  background: transparent;
+  color: var(--sea-700, #2f4d73);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.pill-action:hover:not(:disabled) {
+  background: rgba(127, 169, 214, 0.12);
+}
+.pill-action:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.pill-action.danger {
+  color: #a06b6b;
+  border-color: rgba(160, 107, 107, 0.4);
+}
+.policy h2 {
+  font-family: var(--serif);
+  color: var(--sea-700, #2f4d73);
+  margin: 1.6rem 0 0.6rem;
+  font-size: 1.3rem;
+}
+.policy h3 {
+  color: var(--sea-700, #2f4d73);
+  margin: 1.1rem 0 0.3rem;
+  font-size: 1rem;
+}
+.policy p,
+.policy li {
+  color: var(--ink, #40506b);
+  line-height: 1.85;
+  font-size: 0.95rem;
+}
+.policy ol,
+.policy ul {
+  padding-left: 1.4rem;
+  margin: 0.4rem 0;
+}
+.policy a {
+  color: var(--sea-500, #5b7fb0);
+}
 .page-split {
   width: 100%;
   max-width: 1380px;

@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom'
-import { Search, Heart, LogOut } from 'lucide-react'
+import { Search, Heart, ShoppingBag, LogOut } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useFavorites } from '../context/FavoritesContext.jsx'
+import { useCart } from '../context/CartContext.jsx'
 
 // 牛仔布資料夾標籤導覽（分頁）：撳頂部標籤 = 去到嗰一頁。
 const TABS = [
@@ -12,9 +13,10 @@ const TABS = [
   { to: '/shop', en: 'StyleS', zh: '商店' },
 ]
 
-export default function Nav({ onSearch, onFavorites, onAuth }) {
+export default function Nav({ onSearch, onFavorites, onCart, onAuth }) {
   const { user, logout } = useAuth()
   const { count } = useFavorites()
+  const { count: cartCount } = useCart()
 
   return (
     <nav className="denim-nav">
@@ -31,13 +33,29 @@ export default function Nav({ onSearch, onFavorites, onAuth }) {
             <Heart size={19} />
             {count > 0 && <span className="badge">{count}</span>}
           </button>
+          <button className="icon-btn" onClick={onCart} aria-label="購物車">
+            <ShoppingBag size={19} />
+            {cartCount > 0 && <span className="badge">{cartCount}</span>}
+          </button>
 
           {user ? (
             <div className="account-chip">
-              <span className="avatar">
-                {(user.name || 'A').slice(0, 1).toUpperCase()}
-              </span>
-              <span>{user.name}</span>
+              <NavLink
+                to="/orders"
+                title="我的訂單"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  textDecoration: 'none',
+                  color: 'inherit',
+                }}
+              >
+                <span className="avatar">
+                  {(user.name || 'A').slice(0, 1).toUpperCase()}
+                </span>
+                <span>{user.name}</span>
+              </NavLink>
               <button
                 className="icon-btn"
                 style={{ width: 30, height: 30 }}

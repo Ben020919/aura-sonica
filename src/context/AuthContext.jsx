@@ -1,69 +1,91 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { api, getToken, setToken } from '../lib/api.js'
 
-// 示範版登入/註冊：帳戶資料存喺瀏覽器 localStorage。
-// 日後要真正帳戶系統，只需要換呢個 Provider 入面嘅函式去打後端 API。
-
+// 真實帳戶系統：JWT token 存 localStorage，用戶資料由後端 /api/auth 提供。
 const AuthContext = createContext(null)
-const USERS_KEY = 'aura.users'
-const SESSION_KEY = 'aura.session'
-
-function readUsers() {
-  try {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || '{}')
-  } catch {
-    return {}
-  }
-}
-function writeUsers(u) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(u))
-}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
+  const [ready, setReady] = useState(false) // 有冇檢查完現有 token
 
+  // 開場：如果本機有 token，問後端「我係邊個」（順便驗 token 未過期）
   useEffect(() => {
-    try {
-      const s = localStorage.getItem(SESSION_KEY)
-      if (s) setUser(JSON.parse(s))
-    } catch {
-      /* ignore */
+    if (!getToken()) {
+      setReady(true)
+      return
     }
+    api('/api/auth/me')
+      .then((u) => setUser(u))
+      .catch(() => setToken(null)) // token 壞咗 / 過期
+      .finally(() => setReady(true))
   }, [])
 
-  function persist(u) {
-    setUser(u)
-    if (u) localStorage.setItem(SESSION_KEY, JSON.stringify(u))
-    else localStorage.removeItem(SESSION_KEY)
+  async function register({ name, email, password }) {
+    try {
+      const data = await api('/api/auth/register', {
+        method: 'POST',
+        auth: false,
+        body: { name, email, password },
+      })
+      setToken(data.access_token)
+      setUser(data.user)
+      return { ok: true, user: data.user }
+    } catch (e) {
+      return { ok: false, error: e.status ? e.message : '連唔到伺服器，請稍後再試' }
+    }
   }
 
-  function register({ name, email, password }) {
-    const users = readUsers()
-    const key = email.trim().toLowerCase()
-    if (!key || !password) return { ok: false, error: '請填寫 email 同密碼。' }
-    if (users[key]) return { ok: false, error: '呢個 email 已經註冊咗喇。' }
-    users[key] = { name: name?.trim() || key.split('@')[0], email: key, password }
-    writeUsers(users)
-    persist({ name: users[key].name, email: key })
-    return { ok: true }
+  async function login({ email, password }) {
+    try {
+      const data = await api('/api/auth/login', {
+        method: 'POST',
+        auth: false,
+        body: { email, password },
+      })
+      setToken(data.access_token)
+      setUser(data.user)
+      return { ok: true, user: data.user }
+    } catch (e) {
+      return { ok: false, error: e.status ? e.message : '連唔到伺服器，請稍後再試' }
+    }
   }
 
-  function login({ email, password }) {
-    const users = readUsers()
-    const key = email.trim().toLowerCase()
-    const rec = users[key]
-    if (!rec || rec.password !== password)
-      return { ok: false, error: 'Email 或密碼唔啱。' }
-    persist({ name: rec.name, email: key })
-    return { ok: true }
+  async function forgotPassword(email) {
+    try {
+      const data = await api('/api/auth/forgot', {
+        method: 'POST',
+        auth: false,
+        body: { email },
+      })
+      return { ok: true, message: data.message }
+    } catch (e) {
+      return { ok: false, error: e.status ? e.message : '連唔到伺服器，請稍後再試' }
+    }
+  }
+
+  async function resetPassword({ email, code, password }) {
+    try {
+      const data = await api('/api/auth/reset', {
+        method: 'POST',
+        auth: false,
+        body: { email, code, password },
+      })
+      setToken(data.access_token)
+      setUser(data.user)
+      return { ok: true }
+    } catch (e) {
+      return { ok: false, error: e.status ? e.message : '連唔到伺服器，請稍後再試' }
+    }
   }
 
   function logout() {
-    persist(null)
+    setToken(null)
+    setUser(null)
   }
 
   const value = useMemo(
-    () => ({ user, register, login, logout }),
-    [user],
+    () => ({ user, ready, register, login, logout, forgotPassword, resetPassword }),
+    [user, ready],
   )
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

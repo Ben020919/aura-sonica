@@ -1,15 +1,22 @@
 import { motion } from 'framer-motion'
-import { X, Trash2, Heart } from 'lucide-react'
+import { X, Trash2, Heart, ShoppingBag } from 'lucide-react'
 import { useFavorites } from '../context/FavoritesContext.jsx'
-import { PRODUCTS } from '../data/products.js'
+import { useCart } from '../context/CartContext.jsx'
+import { useCatalog } from '../context/CatalogContext.jsx'
 
+// 收藏 = wishlist（心心）。購物同結帳係另一個 CartDrawer。
 export default function FavoritesDrawer({ onClose }) {
   const { ids, remove } = useFavorites()
-  const items = PRODUCTS.filter((p) => ids.includes(p.id))
-  const total = items.reduce((s, p) => s + p.price, 0)
+  const { add } = useCart()
+  const { products } = useCatalog()
+  const items = products.filter((p) => ids.includes(p.id))
 
   return (
-    <div className="overlay" onClick={onClose} style={{ justifyContent: 'flex-end', padding: 0 }}>
+    <div
+      className="overlay"
+      onClick={onClose}
+      style={{ justifyContent: 'flex-end', padding: 0 }}
+    >
       <motion.aside
         className="drawer"
         onClick={(e) => e.stopPropagation()}
@@ -36,45 +43,34 @@ export default function FavoritesDrawer({ onClose }) {
               喺商店撳一下 ❤️，佢哋就會游到呢度。
             </div>
           ) : (
-            <>
-              {items.map((p) => (
-                <div className="fav-row" key={p.id}>
-                  <img src={p.img} alt={p.name} />
-                  <div className="meta">
-                    <div className="n">{p.name}</div>
-                    <div className="p">HKD {p.price}</div>
-                  </div>
+            items.map((p) => (
+              <div className="fav-row" key={p.id}>
+                <img src={p.img} alt={p.name} />
+                <div className="meta">
+                  <div className="n">{p.name}</div>
+                  <div className="p">HKD {p.price}</div>
                   <button
-                    className="rm"
-                    onClick={() => remove(p.id)}
-                    aria-label="移除"
+                    onClick={() => add(p.id, 1)}
+                    style={{
+                      marginTop: 8,
+                      padding: '0.4em 0.9em',
+                      fontSize: '0.8rem',
+                      borderRadius: 999,
+                      border: '1px solid rgba(127,169,214,0.6)',
+                      background: 'transparent',
+                      color: 'var(--sea-700)',
+                      cursor: 'pointer',
+                    }}
                   >
-                    <Trash2 size={17} />
+                    <ShoppingBag size={13} style={{ marginRight: 5, verticalAlign: -2 }} />
+                    加入購物車
                   </button>
                 </div>
-              ))}
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginTop: '1.4rem',
-                  fontFamily: 'var(--serif)',
-                  color: 'var(--sea-700)',
-                }}
-              >
-                <span>合計</span>
-                <span style={{ fontFamily: 'var(--cormorant)', fontSize: '1.4rem' }}>
-                  HKD {total}
-                </span>
+                <button className="rm" onClick={() => remove(p.id)} aria-label="移除">
+                  <Trash2 size={17} />
+                </button>
               </div>
-              <button
-                className="btn"
-                style={{ width: '100%', justifyContent: 'center', marginTop: '1.2rem' }}
-                onClick={() => alert('付款功能稍後開放 🌊\n（依家可以先收藏心水寶物）')}
-              >
-                結帳（稍後開放）
-              </button>
-            </>
+            ))
           )}
         </div>
       </motion.aside>

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import Landing from '../sections/Landing.jsx'
 import Welcome from '../sections/Welcome.jsx'
 import Note from '../sections/Note.jsx'
@@ -24,6 +25,20 @@ function Footer() {
     <footer className="footer">
       <div className="brand">AURA_Sonica</div>
       <div className="tagline">Listen , to the wave within</div>
+      <div
+        style={{
+          display: 'flex',
+          gap: 18,
+          justifyContent: 'center',
+          flexWrap: 'wrap',
+          margin: '1rem 0',
+          fontSize: '0.85rem',
+        }}
+      >
+        <Link to="/orders" style={{ color: 'inherit', opacity: 0.85 }}>我的訂單</Link>
+        <Link to="/policy" style={{ color: 'inherit', opacity: 0.85 }}>條款與政策</Link>
+        <Link to="/faq" style={{ color: 'inherit', opacity: 0.85 }}>常見問題</Link>
+      </div>
       <div className="small">
         原創 IP · 情緒療癒 · 自我成長
         <br />

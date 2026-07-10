@@ -1,23 +1,24 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Search, X } from 'lucide-react'
-import { PRODUCTS, CATEGORIES } from '../data/products.js'
+import { useCatalog } from '../context/CatalogContext.jsx'
 import ProductCard from './ProductCard.jsx'
 
 const SUGGEST = ['絨面袋', '手機支架', '愛心', '貝殼', '薰衣草', '雲白']
 
 export default function SearchOverlay({ onClose }) {
   const [q, setQ] = useState('')
+  const { products, categories } = useCatalog()
 
   const results = useMemo(() => {
     const key = q.trim().toLowerCase()
     if (!key) return []
-    return PRODUCTS.filter((p) => {
-      const catName = CATEGORIES.find((c) => c.id === p.cat)?.name || ''
+    return products.filter((p) => {
+      const catName = categories.find((c) => c.id === p.cat)?.name || ''
       const hay = [p.name, p.en, catName, ...p.tags].join(' ').toLowerCase()
       return hay.includes(key)
     })
-  }, [q])
+  }, [q, products, categories])
 
   return (
     <motion.div

@@ -1,0 +1,16 @@
+# AURA_Sonica 後端 —— FastAPI + SQLAlchemy
+fastapi>=0.115
+uvicorn[standard]>=0.30
+sqlalchemy>=2.0
+pydantic>=2.7
+pydantic-settings>=2.3
+email-validator>=2.1
+# 認證（Phase 2 會用到，先裝好）
+python-jose[cryptography]>=3.3
+passlib[bcrypt]>=1.7.4
+bcrypt==4.0.1
+python-multipart>=0.0.9
+# 圖片上載壓縮/縮細
+pillow>=10.0
+# Postgres（Render 部署用；本機開發用 SQLite 唔需要佢都得）
+psycopg2-binary>=2.9

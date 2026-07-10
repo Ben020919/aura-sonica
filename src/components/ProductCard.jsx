@@ -1,10 +1,20 @@
+import { useState } from 'react'
 import { Heart } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useFavorites } from '../context/FavoritesContext.jsx'
+import { useCart } from '../context/CartContext.jsx'
 
 export default function ProductCard({ product }) {
   const { has, toggle } = useFavorites()
+  const { add } = useCart()
   const active = has(product.id)
+  const [added, setAdded] = useState(false)
+
+  function addToCart() {
+    add(product.id, 1)
+    setAdded(true)
+    setTimeout(() => setAdded(false), 1200)
+  }
 
   return (
     <motion.article
@@ -42,13 +52,20 @@ export default function ProductCard({ product }) {
             <small>HKD</small>
             {product.price}
           </span>
-          <button
-            className="add-btn"
-            onClick={() => toggle(product.id)}
-            title="加入收藏（付款功能稍後開放）"
-          >
-            {active ? '已收藏' : '收藏'}
-          </button>
+          {product.stock <= 0 ? (
+            <button
+              className="add-btn"
+              disabled
+              style={{ opacity: 0.5, cursor: 'not-allowed' }}
+              title="暫時售罄"
+            >
+              售罄
+            </button>
+          ) : (
+            <button className="add-btn" onClick={addToCart} title="加入購物車">
+              {added ? '已加入 ✓' : '加入購物車'}
+            </button>
+          )}
         </div>
       </div>
     </motion.article>
