@@ -346,6 +346,8 @@ function OrdersPanel() {
                 <select
                   className="admin-input"
                   value={o.status}
+                  disabled={o.status === 'cancelled'}
+                  title={o.status === 'cancelled' ? '客人已取消，狀態已鎖定' : undefined}
                   onChange={(e) => change(o.id, 'status', e.target.value)}
                 >
                   {ORDER_STATUS.map((s) => (
@@ -399,11 +401,11 @@ function NotesPanel() {
         <span className="muted">{notes.length} 則留言</span>
       </div>
       <div className="admin-table-wrap">
-        <table className="admin-table">
+        <table className="admin-table" style={{ tableLayout: 'fixed', minWidth: 560 }}>
           <thead>
             <tr>
-              <th>時間</th>
-              <th>簡稱</th>
+              <th style={{ width: 168 }}>時間</th>
+              <th style={{ width: 110 }}>簡稱</th>
               <th>留言</th>
             </tr>
           </thead>

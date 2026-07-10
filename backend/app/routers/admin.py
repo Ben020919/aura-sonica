@@ -57,6 +57,9 @@ def update_order(
     if payload.status is not None:
         if payload.status not in ORDER_STATUSES:
             raise HTTPException(status_code=400, detail=f"唔啱嘅訂單狀態：{payload.status}")
+        # 客人取消咗（庫存已回補）→ 唔畀再改狀態，避免庫存/流程亂
+        if order.status == "cancelled" and payload.status != "cancelled":
+            raise HTTPException(status_code=400, detail="已取消嘅訂單唔可以再改狀態")
         status_changed = payload.status != order.status
         order.status = payload.status
     if payload.payment_status is not None:
