@@ -156,3 +156,37 @@ textarea.admin-input,
 .admin-editor label.row-check input { width: auto; }
 .admin-row { display: flex; gap: 10px; }
 .admin-row > * { flex: 1; }
+
+/* 訂單篩選 + 自動更新 */
+.admin-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.filter-pill {
+  padding: 6px 13px;
+  border: 1px solid #cdd9e8;
+  border-radius: 999px;
+  background: #fff;
+  color: #3a4a63;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.filter-pill.active { background: #5b7fb0; color: #fff; border-color: #5b7fb0; }
+.filter-count {
+  display: inline-block;
+  min-width: 17px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba(43, 58, 82, 0.1);
+  font-size: 0.72rem;
+}
+.filter-pill.active .filter-count { background: rgba(255, 255, 255, 0.3); }
+.admin-input.admin-search { width: auto; flex: 1 1 160px; min-width: 150px; max-width: 260px; }
+.admin-updated { font-size: 0.78rem; margin: 0 0 12px; }
+
+/* 取消咗嘅訂單：淡化保留（留紀錄，唔刪走） */
+.admin-table tr.row-cancelled td { opacity: 0.5; }
+.admin-table tr.row-cancelled td:first-child { text-decoration: line-through; }

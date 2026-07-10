@@ -193,7 +193,13 @@ export default function MyOrders() {
         </div>
 
         <p style={{ marginTop: '2rem', fontSize: '0.82rem', color: 'var(--ink-soft)' }}>
-          退貨前請睇下 <Link to="/policy">退貨與退款政策</Link>。
+          退貨前請睇下{' '}
+          <Link
+            to="/policy"
+            style={{ color: 'var(--sea-600, #3f6fa8)', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 2 }}
+          >
+            退貨與退款政策 →
+          </Link>
         </p>
       </div>
 
@@ -217,7 +223,8 @@ export default function MyOrders() {
               {busy ? '提交中…' : '提交申請'}
             </button>
             <p style={{ fontSize: '0.78rem', color: 'var(--ink-soft)', marginTop: '0.6rem', lineHeight: 1.6 }}>
-              只接受壞咗 / 寄錯、收貨 7 日內、商品全新連原包裝。詳見退貨政策。
+              只接受壞咗 / 寄錯、收貨 7 日內、商品全新連原包裝。詳見{' '}
+              <Link to="/policy" style={{ color: 'var(--sea-600, #3f6fa8)', fontWeight: 600, textDecoration: 'underline' }}>退貨政策</Link>。
             </p>
           </form>
         </div>

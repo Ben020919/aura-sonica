@@ -124,12 +124,43 @@ function AdminLogin({ login }) {
   )
 }
 
+const ORDER_FILTERS = [
+  { v: 'all', label: '全部' },
+  { v: 'new', label: '新單' },
+  { v: 'paid', label: '已付款' },
+  { v: 'shipped', label: '已寄出' },
+  { v: 'done', label: '完成' },
+  { v: 'returns', label: '退貨中' },
+  { v: 'cancelled', label: '取消' },
+]
+
+// 只用關鍵欄位做「有冇變」嘅指紋，自動刷新時冇變就唔重繪（唔會打斷緊揀嘅下拉）
+function orderSig(arr) {
+  return arr
+    .map((o) => `${o.id}:${o.status}:${o.payment_status}:${o.return_status || ''}:${o.return_note || ''}`)
+    .join('|')
+}
+
 function OrdersPanel() {
   const [orders, setOrders] = useState(null)
   const [err, setErr] = useState('')
+  const [filter, setFilter] = useState('all')
+  const [query, setQuery] = useState('')
+
+  async function load() {
+    try {
+      const data = await api('/api/admin/orders')
+      setOrders((prev) => (prev && orderSig(prev) === orderSig(data) ? prev : data))
+      setErr('')
+    } catch (e) {
+      setErr(e.message)
+    }
+  }
 
   useEffect(() => {
-    api('/api/admin/orders').then(setOrders).catch((e) => setErr(e.message))
+    load()
+    const t = setInterval(load, 30000) // 每 30 秒自動更新
+    return () => clearInterval(t)
   }, [])
 
   async function change(id, field, value) {
@@ -155,26 +186,74 @@ function OrdersPanel() {
 
   if (err) return <p className="admin-err">{err}</p>
   if (!orders) return <p className="muted">載入中…</p>
-  if (!orders.length) return <p className="muted">仲未有訂單。</p>
+
+  const countFor = (v) =>
+    v === 'all'
+      ? orders.length
+      : v === 'returns'
+      ? orders.filter((o) => ['requested', 'approved'].includes(o.return_status)).length
+      : orders.filter((o) => o.status === v).length
+
+  const q = query.trim().toLowerCase()
+  const shown = orders.filter((o) => {
+    if (filter === 'returns') {
+      if (!['requested', 'approved'].includes(o.return_status)) return false
+    } else if (filter !== 'all' && o.status !== filter) {
+      return false
+    }
+    if (q) {
+      const hay = `${o.order_no || ''} ${o.contact_name || ''} ${o.contact_phone || ''} ${o.contact_email || ''}`.toLowerCase()
+      if (!hay.includes(q)) return false
+    }
+    return true
+  })
 
   return (
-    <div className="admin-table-wrap">
-      <table className="admin-table">
-        <thead>
-          <tr>
-            <th>訂單編號</th>
-            <th>客人 / 地址</th>
-            <th>聯絡</th>
-            <th>商品</th>
-            <th>合計</th>
-            <th>訂單狀態</th>
-            <th>付款</th>
-            <th>時間</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.map((o) => (
-            <tr key={o.id}>
+    <>
+      <div className="admin-filters">
+        {ORDER_FILTERS.map((f) => (
+          <button
+            key={f.v}
+            className={`filter-pill ${filter === f.v ? 'active' : ''}`}
+            onClick={() => setFilter(f.v)}
+          >
+            {f.label} <span className="filter-count">{countFor(f.v)}</span>
+          </button>
+        ))}
+        <input
+          className="admin-input admin-search"
+          placeholder="搜尋 編號 / 名 / 電話…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <button className="admin-btn ghost sm" onClick={load} title="立即重新整理">
+          ↻ 更新
+        </button>
+      </div>
+      <p className="admin-updated muted">
+        🟢 每 30 秒自動更新 · 有新訂單亦會即時 email 通知 Venus
+      </p>
+
+      {!shown.length ? (
+        <p className="muted">{orders.length ? '冇符合嘅訂單。' : '仲未有訂單。'}</p>
+      ) : (
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>訂單編號</th>
+                <th>客人 / 地址</th>
+                <th>聯絡</th>
+                <th>商品</th>
+                <th>合計</th>
+                <th>訂單狀態</th>
+                <th>付款</th>
+                <th>時間</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shown.map((o) => (
+                <tr key={o.id} className={o.status === 'cancelled' ? 'row-cancelled' : ''}>
               <td>{o.order_no || `#${o.id}`}</td>
               <td>
                 {o.contact_name}
@@ -266,11 +345,13 @@ function OrdersPanel() {
               <td>
                 <small>{new Date(o.created_at).toLocaleString('zh-HK')}</small>
               </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </>
   )
 }
 
