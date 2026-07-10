@@ -128,8 +128,7 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
                         <div className="p">HKD {p.price}</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
                           <button
-                            className="icon-btn"
-                            style={{ width: 26, height: 26 }}
+                            className="qty-btn"
                             onClick={() => setQty(p.id, (items[p.id] || 1) - 1)}
                             aria-label="減少"
                           >
@@ -139,8 +138,7 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
                             {items[p.id]}
                           </span>
                           <button
-                            className="icon-btn"
-                            style={{ width: 26, height: 26 }}
+                            className="qty-btn"
                             onClick={() => setQty(p.id, (items[p.id] || 1) + 1)}
                             aria-label="增加"
                           >

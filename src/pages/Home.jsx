@@ -35,9 +35,9 @@ function Footer() {
           fontSize: '0.85rem',
         }}
       >
-        <Link to="/orders" style={{ color: 'inherit', opacity: 0.85 }}>我的訂單</Link>
-        <Link to="/policy" style={{ color: 'inherit', opacity: 0.85 }}>條款與政策</Link>
-        <Link to="/faq" style={{ color: 'inherit', opacity: 0.85 }}>常見問題</Link>
+        <Link to="/orders" style={{ color: 'var(--sea-700, #2f4d73)' }}>我的訂單</Link>
+        <Link to="/policy" style={{ color: 'var(--sea-700, #2f4d73)' }}>條款與政策</Link>
+        <Link to="/faq" style={{ color: 'var(--sea-700, #2f4d73)' }}>常見問題</Link>
       </div>
       <div className="small">
         原創 IP · 情緒療癒 · 自我成長

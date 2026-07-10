@@ -74,7 +74,7 @@
   font-weight: 600;
   white-space: nowrap;
 }
-.admin-table small { color: #8595ac; }
+.admin-table small { color: #5b6b85; }
 
 .admin-prod { display: flex; align-items: center; gap: 14px; }
 .admin-prod img { width: 50px; height: 50px; object-fit: cover; border-radius: 10px; }

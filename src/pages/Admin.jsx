@@ -595,34 +595,35 @@ function ProductEditor({ product, categories, onCategoryCreated, onClose, onSave
           英文名（可選）
           <input value={form.name_en} onChange={(e) => up('name_en', e.target.value)} />
         </label>
+        <label>
+          分類
+          <div style={{ display: 'flex', gap: 6 }}>
+            <select
+              style={{ flex: 1, minWidth: 0 }}
+              value={form.category}
+              onChange={(e) => up('category', e.target.value)}
+            >
+              {(categories.length
+                ? categories
+                : [{ slug: 'bag', name: '絨面袋' }, { slug: 'grip', name: '手機支架' }]
+              ).map((c) => (
+                <option key={c.slug} value={c.slug}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className="admin-btn ghost sm"
+              onClick={addCategory}
+              title="新增分類"
+              style={{ whiteSpace: 'nowrap' }}
+            >
+              ＋ 新分類
+            </button>
+          </div>
+        </label>
         <div className="admin-row">
-          <label>
-            分類
-            <div style={{ display: 'flex', gap: 6 }}>
-              <select
-                style={{ flex: 1 }}
-                value={form.category}
-                onChange={(e) => up('category', e.target.value)}
-              >
-                {(categories.length
-                  ? categories
-                  : [{ slug: 'bag', name: '絨面袋' }, { slug: 'grip', name: '手機支架' }]
-                ).map((c) => (
-                  <option key={c.slug} value={c.slug}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="button"
-                className="admin-btn ghost sm"
-                onClick={addCategory}
-                title="新增分類"
-              >
-                ＋ 新分類
-              </button>
-            </div>
-          </label>
           <label>
             價錢 HKD
             <input
