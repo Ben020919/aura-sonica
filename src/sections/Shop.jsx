@@ -1,29 +1,39 @@
-import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import Reveal from '../components/Reveal.jsx'
-import ProductCard from '../components/ProductCard.jsx'
 import { useCatalog } from '../context/CatalogContext.jsx'
 
+// 每件產品一條 lookbook：一行相（3 張，公仔 4 張）+ 名 + 價 + Shop Now
+function Lookbook({ product }) {
+  const gallery = (product.gallery?.length ? product.gallery : [product.img]).slice(0, 4)
+  return (
+    <Reveal delay={0.05}>
+      <article className="lookbook">
+        <div className={`lookbook-photos count-${gallery.length}`}>
+          {gallery.map((g, i) => (
+            <Link key={i} to={`/product/${product.id}`} className="lookbook-photo" aria-label={product.name}>
+              <img src={g} alt={product.name} loading="lazy" />
+            </Link>
+          ))}
+        </div>
+        <div className="lookbook-foot">
+          <div className="lookbook-meta">
+            {product.en && <span className="lookbook-en">{product.en}</span>}
+            <span className="lookbook-name">{product.name}</span>
+            <span className="lookbook-price">
+              <small>HKD</small> {product.price}
+            </span>
+          </div>
+          <Link to={`/product/${product.id}`} className="lookbook-shop">
+            Shop Now →
+          </Link>
+        </div>
+      </article>
+    </Reveal>
+  )
+}
+
 export default function Shop() {
-  // 商品/分類由後端讀（Venus 後台改乜，呢度就顯示乜）。
-  const { categories, productsByCat, loading } = useCatalog()
-  const [open, setOpen] = useState({})
-
-  // 分類載入到就預設全部展開（客戶要求一入嚟就見到所有商品）。
-  useEffect(() => {
-    setOpen((prev) => {
-      const next = { ...prev }
-      categories.forEach((c) => {
-        if (!(c.id in next)) next[c.id] = true
-      })
-      return next
-    })
-  }, [categories])
-
-  function toggle(id) {
-    setOpen((o) => ({ ...o, [id]: !o[id] }))
-  }
+  const { products, loading } = useCatalog()
 
   return (
     <section className="page shop-page" id="shop">
@@ -35,7 +45,7 @@ export default function Shop() {
             </div>
           </Reveal>
           <Reveal delay={0.15}>
-            <h2>Aura Sonica@Store</h2>
+            <h2>Aura Sonica @ Store</h2>
           </Reveal>
           <Reveal delay={0.3}>
             <p
@@ -46,72 +56,25 @@ export default function Shop() {
                 fontWeight: 300,
               }}
             >
-              撳一下分類標題,就可以進去看看每一件寶物。
+              每一件，都是從忘聲海帶回來的寶物。
             </p>
           </Reveal>
         </div>
 
         {loading ? (
-          <p
-            style={{
-              textAlign: 'center',
-              color: 'var(--ink-soft)',
-              padding: '3rem 0',
-            }}
-          >
+          <p style={{ textAlign: 'center', color: 'var(--ink-soft)', padding: '3rem 0' }}>
             載入商品中… 🐚
           </p>
+        ) : products.length === 0 ? (
+          <p style={{ textAlign: 'center', color: 'var(--ink-soft)', padding: '3rem 0' }}>
+            商品即將上架 🐚
+          </p>
         ) : (
-          categories.map((cat, i) => {
-            const items = productsByCat(cat.id)
-            const isOpen = !!open[cat.id]
-            return (
-              <Reveal key={cat.id} delay={i * 0.1}>
-                <div className={`category${isOpen ? ' open' : ''}`}>
-                  <button
-                    className="category-header"
-                    onClick={() => toggle(cat.id)}
-                    aria-expanded={isOpen}
-                  >
-                    {cat.cover && (
-                      <img className="bg" src={cat.cover} alt="" aria-hidden />
-                    )}
-                    <div className="category-title">
-                      <div className="en">{cat.en}</div>
-                      <div className="zh">{cat.name}</div>
-                      <div className="tagline">{cat.tagline}</div>
-                    </div>
-                    <div className="category-toggle">
-                      <span>
-                        {items.length} 件 · {isOpen ? '收起' : '展開'}
-                      </span>
-                      <ChevronDown className="chev" size={22} />
-                    </div>
-                  </button>
-
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        className="category-body"
-                        key="body"
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                        style={{ overflow: 'hidden' }}
-                      >
-                        <div className="product-grid">
-                          {items.map((p) => (
-                            <ProductCard key={p.id} product={p} />
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </Reveal>
-            )
-          })
+          <div className="lookbook-list">
+            {products.map((p) => (
+              <Lookbook key={p.id} product={p} />
+            ))}
+          </div>
         )}
       </div>
     </section>

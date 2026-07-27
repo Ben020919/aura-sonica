@@ -12,6 +12,7 @@ import Admin from './pages/Admin.jsx'
 import MyOrders from './pages/MyOrders.jsx'
 import Policy from './pages/Policy.jsx'
 import Faq from './pages/Faq.jsx'
+import ProductDetail from './pages/ProductDetail.jsx'
 import About from './sections/About.jsx'
 import Character from './sections/Character.jsx'
 import Story from './sections/Story.jsx'
@@ -49,6 +50,7 @@ function AnimatedRoutes() {
         <Route path="/aura" element={<Page><Character /></Page>} />
         <Route path="/story" element={<Page><Story /></Page>} />
         <Route path="/shop" element={<Page><Shop /></Page>} />
+        <Route path="/product/:slug" element={<Page><ProductDetail /></Page>} />
         <Route path="/orders" element={<Page><MyOrders /></Page>} />
         <Route path="/policy" element={<Page><Policy /></Page>} />
         <Route path="/faq" element={<Page><Faq /></Page>} />
