@@ -14,7 +14,7 @@ export default function About() {
           viewport={{ once: true, amount: 0.25 }}
           transition={{ duration: 0.9, delay: 0, ease: [0.22, 1, 0.36, 1] }}
         >
-          <img src="/products/11.jpeg" alt="Listen to the wave within" />
+          <img src="/products/hero-about.jpeg" alt="Listen to the wave within" />
         </motion.div>
 
         <div className="text-side">

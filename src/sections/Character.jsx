@@ -49,7 +49,7 @@ export default function Character() {
           viewport={{ once: true, amount: 0.25 }}
           transition={{ duration: 0.9, delay: 0, ease: [0.22, 1, 0.36, 1] }}
         >
-          <img src="/products/12.jpeg" alt="Aura — 原創 IP 角色" />
+          <img src="/products/hero-aura.jpeg" alt="Aura — 原創 IP 角色" />
         </motion.div>
       </div>
     </section>
