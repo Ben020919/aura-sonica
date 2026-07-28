@@ -32,6 +32,9 @@ export default function Story() {
         <div className="text-side">
           <MagDecor variant="story" />
           <Reveal delay={0}>
+            <div className="kicker">Gallery</div>
+          </Reveal>
+          <Reveal delay={0}>
             <div className="kicker">A Story from the Sea</div>
           </Reveal>
           <Reveal delay={0}>
