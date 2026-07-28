@@ -16,6 +16,7 @@ import ProductDetail from './pages/ProductDetail.jsx'
 import About from './sections/About.jsx'
 import Character from './sections/Character.jsx'
 import Story from './sections/Story.jsx'
+import Gallery from './sections/Gallery.jsx'
 import Shop from './sections/Shop.jsx'
 
 // 換頁淡入轉場
@@ -49,6 +50,7 @@ function AnimatedRoutes() {
         <Route path="/about" element={<Page><About /></Page>} />
         <Route path="/aura" element={<Page><Character /></Page>} />
         <Route path="/story" element={<Page><Story /></Page>} />
+        <Route path="/gallery" element={<Page><Gallery /></Page>} />
         <Route path="/shop" element={<Page><Shop /></Page>} />
         <Route path="/product/:slug" element={<Page><ProductDetail /></Page>} />
         <Route path="/orders" element={<Page><MyOrders /></Page>} />
