@@ -32,21 +32,21 @@ PRODUCTS = [
         "note": "柔軟緞面手挽袋，燙印 Aura 手寫字。像把一整片海挽在臂彎。",
     },
     {
-        "slug": "stand-blue", "name": "Phone Stand · Sea Blue", "name_en": "Phone Stand — Sea Blue",
+        "slug": "stand-blue", "name": "Phone Stand", "name_en": "Phone Stand",
         "category": "grip", "price": 20, "stock": 50, "sort_order": 2,
         "img": "/products/8.jpeg",
         "gallery": ["/products/8.jpeg", "/products/9.jpeg", "/products/10.jpeg"],
         "note": "海藍貝殼氣囊支架，握住手機時像握住一小片潮汐。",
     },
     {
-        "slug": "stand-purple", "name": "Phone Stand · Lavender", "name_en": "Phone Stand — Lavender",
+        "slug": "stand-purple", "name": "Phone Stand", "name_en": "Phone Stand",
         "category": "grip", "price": 20, "stock": 50, "sort_order": 3,
         "img": "/products/5.jpeg",
         "gallery": ["/products/5.jpeg", "/products/6.jpeg", "/products/4.jpeg"],
         "note": "薰衣草貝殼，流動紋理像被海水洗過的紫水晶。",
     },
     {
-        "slug": "figure-aura", "name": "AURA Model Figure · Ocean Blue", "name_en": "AURA Model Figure — Ocean Blue",
+        "slug": "figure-aura", "name": "AURA Model Figure", "name_en": "AURA Model Figure",
         "category": "figure", "price": 599, "stock": 20, "sort_order": 4,
         "img": "/products/figure-front.jpeg",
         "gallery": [
@@ -57,7 +57,7 @@ PRODUCTS = [
                 "前後左右每一面，都是海的細節。",
     },
     {
-        "slug": "figure-white", "name": "AURA Model Figure · Pearl White", "name_en": "AURA Model Figure — Pearl White",
+        "slug": "figure-white", "name": "AURA Model Figure", "name_en": "AURA Model Figure",
         "category": "figure", "price": 599, "stock": 20, "sort_order": 5,
         "img": "/products/figure-white-front.jpeg",
         "gallery": [
