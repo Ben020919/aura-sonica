@@ -1555,6 +1555,9 @@ a {
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
+    /* 手機：條 tab strip 要收得返 touch 先掃得郁去 Gallery */
+    pointer-events: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .denim-tabs::-webkit-scrollbar {
     display: none;
