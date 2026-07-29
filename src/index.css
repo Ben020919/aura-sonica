@@ -1550,22 +1550,28 @@ a {
     max-width: none;
   }
   /* 牛仔標籤：窄螢幕可橫向捲、縮細 */
+  /* 手機：6 個 tab 平均分佈、一行擺晒，唔使橫掃（避免切一半嘅怪相） */
   .denim-tabs {
-    justify-content: flex-start;
+    justify-content: center;
     flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-    /* 手機：條 tab strip 要收得返 touch 先掃得郁去 Gallery */
-    pointer-events: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  .denim-tabs::-webkit-scrollbar {
-    display: none;
+    overflow-x: hidden;
+    gap: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
   }
   .dtab {
-    flex: 0 0 auto;
-    min-width: 78px;
-    padding: 0.45rem 0.7rem 0.75rem;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: none;
+    padding: 0.42rem 0.25rem 0.62rem;
+  }
+  .dtab .en {
+    font-size: 0.8rem;
+  }
+  .dtab .zh {
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    padding-left: 0;
   }
   .denim-bar .brand {
     font-size: 0.95rem;
