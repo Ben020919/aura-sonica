@@ -620,6 +620,42 @@ a {
   align-items: flex-start;
   min-height: calc(100vh - 60px);
 }
+
+/* Gallery：Venus 原創畫作 */
+.gallery-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 1000px;
+  margin: 2.5rem auto 0;
+}
+.gallery-art {
+  flex: 1 1 380px;
+  max-width: 460px;
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(60, 80, 120, 0.14);
+}
+@media (max-width: 860px) {
+  /* 手機：收窄頂部留白 + 限高，令兩張畫盡量一個 screen 睇晒，唔使狂 scroll */
+  .gallery-page.page {
+    padding-top: 126px;
+  }
+  .gallery-grid {
+    gap: 1rem;
+    margin-top: 1.2rem;
+  }
+  .gallery-art {
+    flex-basis: auto;
+    width: auto;
+    max-width: 86%;
+    max-height: 42vh;
+  }
+}
 /* 長內容頁（我的訂單 / 政策 / FAQ）：由頂開始，唔好垂直置中 */
 .page.doc-page {
   align-items: flex-start;
