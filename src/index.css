@@ -650,9 +650,11 @@ a {
     margin-top: 1.2rem;
   }
   .gallery-art {
-    flex-basis: auto;
+    /* flex-grow 會迫闊度令圖變形，改 0 0 auto + 讓 width/height 自動保持比例 */
+    flex: 0 0 auto;
     width: auto;
-    max-width: 86%;
+    height: auto;
+    max-width: 90%;
     max-height: 42vh;
   }
 }
