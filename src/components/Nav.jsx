@@ -10,7 +10,7 @@ const TABS = [
   { to: '/about', en: 'AbouT', zh: '關於' },
   { to: '/aura', en: 'AurA', zh: '主角' },
   { to: '/story', en: 'StorY', zh: '故事' },
-  { to: '/shop', en: 'StyleS', zh: '商店' },
+  { to: '/shop', en: 'Store', zh: '商店' },
   { to: '/gallery', en: 'GallerY', zh: '畫廊' },
 ]
 
