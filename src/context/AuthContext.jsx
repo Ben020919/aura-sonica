@@ -78,13 +78,46 @@ export function AuthProvider({ children }) {
     }
   }
 
+  // 個人資料（地址簿）：姓名 / 電話 / 收貨地址
+  async function updateProfile({ name, phone, address }) {
+    try {
+      const u = await api('/api/auth/me', { method: 'PATCH', body: { name, phone, address } })
+      setUser(u)
+      return { ok: true, user: u }
+    } catch (e) {
+      return { ok: false, error: e.status ? e.message : '連唔到伺服器，請稍後再試' }
+    }
+  }
+
+  async function changePassword({ current_password, new_password }) {
+    try {
+      const data = await api('/api/auth/change-password', {
+        method: 'POST',
+        body: { current_password, new_password },
+      })
+      return { ok: true, message: data.message }
+    } catch (e) {
+      return { ok: false, error: e.status ? e.message : '連唔到伺服器，請稍後再試' }
+    }
+  }
+
   function logout() {
     setToken(null)
     setUser(null)
   }
 
   const value = useMemo(
-    () => ({ user, ready, register, login, logout, forgotPassword, resetPassword }),
+    () => ({
+      user,
+      ready,
+      register,
+      login,
+      logout,
+      forgotPassword,
+      resetPassword,
+      updateProfile,
+      changePassword,
+    }),
     [user, ready],
   )
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

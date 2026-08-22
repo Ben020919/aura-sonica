@@ -22,7 +22,7 @@ const inputStyle = {
 
 export default function CartDrawer({ onClose, onRequestLogin }) {
   const { items, setQty, remove, clear } = useCart()
-  const { user } = useAuth()
+  const { user, updateProfile } = useAuth()
   const { products } = useCatalog()
   const cartItems = useMemo(
     () =>
@@ -53,7 +53,13 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
       onRequestLogin?.()
       return
     }
-    setForm((f) => ({ ...f, contact_name: f.contact_name || user.name || '' }))
+    // 用個人資料（地址簿）自動填好，唔使次次再打
+    setForm((f) => ({
+      ...f,
+      contact_name: f.contact_name || user.name || '',
+      contact_phone: f.contact_phone || user.phone || '',
+      shipping_address: f.shipping_address || user.address || '',
+    }))
     setError('')
     setView('form')
   }
@@ -76,6 +82,14 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
         },
       })
       setPlaced(order)
+      // 第一次填嘅聯絡資料存落個人資料（地址簿），下次落單自動填好
+      if (user && !user.phone && !user.address) {
+        updateProfile?.({
+          name: user.name || form.contact_name,
+          phone: form.contact_phone,
+          address: form.shipping_address,
+        })
+      }
       clear() // 落單成功清空購物車
       setView('done')
     } catch (err) {

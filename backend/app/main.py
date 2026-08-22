@@ -22,23 +22,32 @@ _NEW_COLUMNS = {
     "users": [
         ("reset_code", "VARCHAR(6)"),
         ("reset_expires", "DATETIME"),
+        ("phone", "VARCHAR(40)"),   # 個人資料（地址簿）
+        ("address", "TEXT"),
     ],
 }
 
 
 def _auto_migrate() -> None:
-    if not engine.url.get_backend_name().startswith("sqlite"):
-        return
+    """現有表補新欄。SQLite 用 PRAGMA 檢查；Postgres（Neon）用 ADD COLUMN IF NOT EXISTS，重複行都安全。"""
+    is_sqlite = engine.url.get_backend_name().startswith("sqlite")
     try:
         with engine.begin() as conn:
             for table, cols in _NEW_COLUMNS.items():
-                existing = {
-                    r[1] for r in conn.execute(text(f"PRAGMA table_info({table})"))
-                }
-                for name, ddl in cols:
-                    if name not in existing:
+                if is_sqlite:
+                    existing = {
+                        r[1] for r in conn.execute(text(f"PRAGMA table_info({table})"))
+                    }
+                    for name, ddl in cols:
+                        if name not in existing:
+                            conn.execute(
+                                text(f"ALTER TABLE {table} ADD COLUMN {name} {ddl}")
+                            )
+                else:
+                    for name, ddl in cols:
+                        pg_ddl = "TIMESTAMP" if ddl.upper() == "DATETIME" else ddl
                         conn.execute(
-                            text(f"ALTER TABLE {table} ADD COLUMN {name} {ddl}")
+                            text(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {name} {pg_ddl}")
                         )
     except Exception as e:  # noqa: BLE001
         print(f"[migrate] 略過 auto-migrate：{e}")

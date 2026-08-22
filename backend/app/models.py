@@ -28,6 +28,9 @@ class User(Base):
     email = Column(String(255), unique=True, index=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
     name = Column(String(120))
+    # 個人資料（地址簿）：落單時自動填好，唔使次次再打
+    phone = Column(String(40))
+    address = Column(Text)
     is_admin = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=_utcnow, nullable=False)
 

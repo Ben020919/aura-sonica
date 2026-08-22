@@ -53,6 +53,40 @@ def me(user: models.User = Depends(get_current_user)):
     return user
 
 
+@router.patch("/me", response_model=schemas.UserOut)
+def update_me(
+    payload: schemas.ProfileUpdate,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """更新個人資料（地址簿）：姓名 / 電話 / 收貨地址，落單時自動填好。"""
+    if payload.name is not None:
+        user.name = payload.name.strip() or None
+    if payload.phone is not None:
+        user.phone = payload.phone.strip() or None
+    if payload.address is not None:
+        user.address = payload.address.strip() or None
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.post("/change-password")
+def change_password(
+    payload: schemas.PasswordChange,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """登入狀態下改密碼：要輸入現有密碼先改到。"""
+    if not verify_password(payload.current_password, user.password_hash):
+        raise HTTPException(status_code=400, detail="現有密碼唔啱")
+    if verify_password(payload.new_password, user.password_hash):
+        raise HTTPException(status_code=400, detail="新密碼唔可以同現有密碼一樣")
+    user.password_hash = hash_password(payload.new_password)
+    db.commit()
+    return {"ok": True, "message": "密碼已更改"}
+
+
 @router.post("/forgot")
 def forgot_password(
     payload: schemas.ForgotRequest,

@@ -65,7 +65,21 @@ class UserOut(BaseModel):
     id: int
     email: EmailStr
     name: str | None = None
+    phone: str | None = None
+    address: str | None = None
     is_admin: bool
+
+
+class ProfileUpdate(BaseModel):
+    """個人資料（地址簿）"""
+    name: str | None = None
+    phone: str | None = None
+    address: str | None = None
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=6)
 
 
 class Token(BaseModel):

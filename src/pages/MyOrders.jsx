@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../lib/api.js'
 import { downloadReceiptPdf } from '../lib/receipt.js'
 import Receipt from '../components/Receipt.jsx'
+import ProfileCard from '../components/ProfileCard.jsx'
 import { whatsappPayLink } from '../lib/whatsapp.js'
 
 const STATUS = {
@@ -104,9 +105,11 @@ export default function MyOrders() {
         <h2 style={{ fontFamily: 'var(--serif)', color: 'var(--sea-700)', marginBottom: '0.4rem' }}>
           我的訂單
         </h2>
-        <p style={{ color: 'var(--ink-soft)', marginBottom: '1.8rem', fontSize: '0.9rem' }}>
+        <p style={{ color: 'var(--ink-soft)', marginBottom: '1.4rem', fontSize: '0.9rem' }}>
           睇返你嘅訂單同狀態,亦可以喺呢度下載收據、申請退貨。
         </p>
+
+        <ProfileCard />
 
         {err && <p style={{ color: '#a06b6b' }}>{err}</p>}
         {!orders && !err && <p style={{ color: 'var(--ink-soft)' }}>載入中… 🐚</p>}
