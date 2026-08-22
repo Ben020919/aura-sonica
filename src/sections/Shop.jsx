@@ -51,6 +51,7 @@ function ProductCard({ product }) {
       <span className="pcard-price">
         <small>HKD</small> {product.price}
       </span>
+      <span className="pcard-cta lookbook-shop">Shop Now →</span>
     </Link>
   )
 }

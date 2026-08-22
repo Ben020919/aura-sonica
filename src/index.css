@@ -1631,9 +1631,16 @@ a {
   gap: clamp(0.8rem, 2vw, 1.6rem);
 }
 .pcard {
-  display: block;
+  display: flex; /* column：個 Shop Now 掣靠底，同一行嘅卡對齊 */
+  flex-direction: column;
   text-decoration: none;
   color: inherit;
+}
+.pcard .pcard-cta {
+  margin-top: auto; /* 推到卡底：同一行有冇 eyebrow 嘅卡，掣都對齊 */
+  align-self: flex-start;
+  padding: 0.5rem 1.15rem;
+  font-size: 0.8rem;
 }
 .pcard-photo {
   overflow: hidden;
@@ -1669,6 +1676,7 @@ a {
 .pcard-price {
   display: block;
   margin-top: 0.22rem;
+  margin-bottom: 0.85rem;
   color: var(--ink-soft);
 }
 .pcard-price small {
@@ -1677,14 +1685,21 @@ a {
   margin-right: 0.3em;
 }
 @media (max-width: 640px) {
+  /* 手機：4 張一行太細，改 2 欄（兩行），圖大啲、文字唔會亂換行 */
   .pgrid {
-    gap: 0.55rem;
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.9rem;
   }
   .pcard-sub {
-    font-size: 0.55rem;
+    font-size: 0.58rem;
   }
   .pcard-name {
-    font-size: 0.88rem;
+    font-size: 0.95rem;
+  }
+  .pcard .pcard-cta {
+    padding: 0.42rem 0.95rem;
+    font-size: 0.74rem;
   }
 }
 .lookbook-photo {
