@@ -109,6 +109,24 @@ def update_order(
     return order
 
 
+@router.delete("/orders/{order_id}")
+def delete_order(order_id: int, db: Session = Depends(get_db)):
+    """刪除訂單（例如測試單）。未出貨（new / paid）嘅單刪走＝貨返，回補庫存；
+    取消／已退款嗰啲之前已經回補過，唔再加。"""
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="搵唔到訂單")
+    if order.status in ("new", "paid"):
+        for it in order.items:
+            if it.product_id:
+                p = db.query(models.Product).filter(models.Product.id == it.product_id).first()
+                if p:
+                    p.stock += it.quantity
+    db.delete(order)  # order_items 會一齊刪（cascade）
+    db.commit()
+    return {"ok": True}
+
+
 # ── 商品 ────────────────────────────────────
 @router.get("/products", response_model=list[schemas.ProductOut])
 def all_products(db: Session = Depends(get_db)):
@@ -259,3 +277,14 @@ def delete_category(cat_id: int, db: Session = Depends(get_db)):
 def all_notes(db: Session = Depends(get_db)):
     """後台睇客人留言（最新喺上）。"""
     return db.query(models.Note).order_by(models.Note.created_at.desc()).all()
+
+
+@router.delete("/notes/{note_id}")
+def delete_note(note_id: int, db: Session = Depends(get_db)):
+    """刪除留言（測試／垃圾留言）。"""
+    note = db.query(models.Note).filter(models.Note.id == note_id).first()
+    if not note:
+        raise HTTPException(status_code=404, detail="搵唔到留言")
+    db.delete(note)
+    db.commit()
+    return {"ok": True}

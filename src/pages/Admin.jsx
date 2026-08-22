@@ -175,6 +175,16 @@ function OrdersPanel() {
     return () => clearInterval(t)
   }, [])
 
+  async function remove(o) {
+    if (!confirm(`確定刪除訂單 ${o.order_no}？\n刪咗就冇得返轉頭（未出貨嘅單會回補庫存）。`)) return
+    try {
+      await api('/api/admin/orders/' + o.id, { method: 'DELETE' })
+      setOrders((os) => os.filter((x) => x.id !== o.id))
+    } catch (e) {
+      alert(e.message)
+    }
+  }
+
   async function change(id, field, value) {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
@@ -372,6 +382,16 @@ function OrdersPanel() {
               </td>
               <td>
                 <small>{new Date(o.created_at).toLocaleString('zh-HK')}</small>
+                <div style={{ marginTop: 6 }}>
+                  <button
+                    className="admin-btn ghost sm"
+                    style={{ color: '#a06b6b', whiteSpace: 'nowrap' }}
+                    onClick={() => remove(o)}
+                    title="刪除呢張訂單"
+                  >
+                    🗑 刪除
+                  </button>
+                </div>
               </td>
                 </tr>
               ))}
@@ -391,6 +411,16 @@ function NotesPanel() {
     api('/api/admin/notes').then(setNotes).catch((e) => setErr(e.message))
   }, [])
 
+  async function remove(n) {
+    if (!confirm('確定刪除呢則留言？刪咗就冇得返轉頭。')) return
+    try {
+      await api('/api/admin/notes/' + n.id, { method: 'DELETE' })
+      setNotes((ns) => ns.filter((x) => x.id !== n.id))
+    } catch (e) {
+      alert(e.message)
+    }
+  }
+
   if (err) return <p className="admin-err">{err}</p>
   if (!notes) return <p className="muted">載入中…</p>
   if (!notes.length) return <p className="muted">仲未有留言。</p>
@@ -407,6 +437,7 @@ function NotesPanel() {
               <th style={{ width: 168 }}>時間</th>
               <th style={{ width: 110 }}>簡稱</th>
               <th>留言</th>
+              <th style={{ width: 90 }}></th>
             </tr>
           </thead>
           <tbody>
@@ -417,6 +448,16 @@ function NotesPanel() {
                 </td>
                 <td>{n.nickname || '—'}</td>
                 <td style={{ whiteSpace: 'pre-wrap' }}>{n.message}</td>
+                <td>
+                  <button
+                    className="admin-btn ghost sm"
+                    style={{ color: '#a06b6b', whiteSpace: 'nowrap' }}
+                    onClick={() => remove(n)}
+                    title="刪除呢則留言"
+                  >
+                    🗑 刪除
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
