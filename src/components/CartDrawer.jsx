@@ -1,11 +1,13 @@
 import { useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { X, Trash2, ShoppingBag, Minus, Plus, ChevronLeft, Download } from 'lucide-react'
+import { X, Trash2, ShoppingBag, Minus, Plus, ChevronLeft, Download, MessageCircle } from 'lucide-react'
 import { useCart } from '../context/CartContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../lib/api.js'
 import { downloadReceiptPdf } from '../lib/receipt.js'
 import { useCatalog } from '../context/CatalogContext.jsx'
+import { lineTotal } from '../lib/pricing.js'
+import { whatsappPayLink, WHATSAPP_DISPLAY } from '../lib/whatsapp.js'
 
 const inputStyle = {
   width: '100%',
@@ -43,7 +45,8 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
   const [makingPdf, setMakingPdf] = useState(false)
   const receiptRef = useRef(null)
 
-  const total = cartItems.reduce((s, p) => s + p.price * (items[p.id] || 0), 0)
+  // 套裝價（例：postcard 2 張 $18）由 lineTotal 計
+  const total = cartItems.reduce((s, p) => s + lineTotal(p.id, p.price, items[p.id] || 0), 0)
 
   function goCheckout() {
     if (!user) {
@@ -271,7 +274,7 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
                 {submitting ? '落單中…' : `確認落單 · HKD ${total}`}
               </button>
               <p style={{ fontSize: '0.8rem', color: 'var(--ink-soft)', marginTop: '0.8rem', lineHeight: 1.6 }}>
-                🚚 送貨：<strong>順豐到付</strong>。落單後 Venus 會聯絡你安排商品付款（FPS／轉數快）🌊
+                🚚 送貨：<strong>順豐到付</strong>。落單後 WhatsApp Venus 安排商品付款（FPS／轉數快）🌊
               </p>
             </form>
           </>
@@ -293,10 +296,32 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
               </h4>
               <p style={{ color: 'var(--ink-soft)' }}>訂單編號 {placed?.order_no}</p>
               <p style={{ color: 'var(--ink-soft)', marginTop: '0.8rem', lineHeight: 1.7 }}>
-                確認信已寄到你嘅 email；
+                確認信（電子收據）已寄到你嘅 email 📧
                 <br />
-                Venus 會盡快聯絡你安排付款同寄送 🌊
+                下一步：WhatsApp Venus 安排付款（FPS／轉數快）
+                <br />
+                訊息已自動填好你買咗咩、幾多錢 🌊
               </p>
+              {placed && (
+                <a
+                  className="btn"
+                  href={whatsappPayLink(placed)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    width: '100%',
+                    justifyContent: 'center',
+                    marginTop: '1.4rem',
+                    background: '#25d366',
+                    borderColor: '#25d366',
+                    color: '#fff',
+                    textDecoration: 'none',
+                  }}
+                >
+                  <MessageCircle size={17} style={{ marginRight: 6 }} />
+                  WhatsApp Venus 付款（{WHATSAPP_DISPLAY}）
+                </a>
+              )}
               <button
                 className="btn"
                 disabled={makingPdf}

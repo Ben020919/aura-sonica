@@ -19,6 +19,19 @@ from ..notifications import (
 
 router = APIRouter(prefix="/api/orders", tags=["orders"])
 
+# 套裝價（要同前端 src/lib/pricing.js 一致）；而家冇，日後有就加返
+BUNDLE_PRICES = {}
+
+
+def bundle_line_total(slug: str, unit_price: float, qty: int) -> float:
+    """套裝價計法：夠一套用套裝價，唔夠一套嘅零頭照單價計。"""
+    bundle = BUNDLE_PRICES.get(slug)
+    if not bundle:
+        return float(unit_price) * qty
+    per_set, set_price = bundle
+    sets, rem = divmod(qty, per_set)
+    return sets * set_price + rem * float(unit_price)
+
 
 @router.post("", response_model=schemas.OrderOut, status_code=201)
 def create_order(
@@ -70,7 +83,7 @@ def create_order(
                 detail=f"「{product.name}」庫存不足（剩 {product.stock} 件）",
             )
         product.stock -= line.quantity  # 落單即扣庫存，唔會賣超
-        line_total = float(product.price) * line.quantity
+        line_total = bundle_line_total(product.slug, product.price, line.quantity)
         subtotal += line_total
         order.items.append(
             models.OrderItem(

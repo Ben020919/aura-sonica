@@ -62,12 +62,18 @@ def update_order(
             raise HTTPException(status_code=400, detail="已取消嘅訂單唔可以再改狀態")
         status_changed = payload.status != order.status
         order.status = payload.status
+        if payload.status == "paid":
+            order.payment_status = "paid"  # 訂單標「已付款」＝收咗錢
     if payload.payment_status is not None:
         if payload.payment_status not in PAYMENT_STATUSES:
             raise HTTPException(
                 status_code=400, detail=f"唔啱嘅付款狀態：{payload.payment_status}"
             )
         order.payment_status = payload.payment_status
+        # Venus 淨係改「已付」→ 訂單自動跳去「已付款・準備中」，客人帳戶會見到、亦會收到 email
+        if payload.payment_status == "paid" and order.status == "new":
+            order.status = "paid"
+            status_changed = True
 
     return_changed = False
     if payload.return_status is not None:

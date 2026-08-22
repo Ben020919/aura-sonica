@@ -26,7 +26,7 @@ export default function Story() {
           viewport={{ once: true, amount: 0.25 }}
           transition={{ duration: 0.9, delay: 0, ease: [0.22, 1, 0.36, 1] }}
         >
-          <img src="/products/7.jpeg" alt="第一顆珍珠" />
+          <img src="/products/story-v3.jpeg" alt="第一顆珍珠" />
         </motion.div>
 
         <div className="text-side">

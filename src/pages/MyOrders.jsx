@@ -4,10 +4,11 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../lib/api.js'
 import { downloadReceiptPdf } from '../lib/receipt.js'
 import Receipt from '../components/Receipt.jsx'
+import { whatsappPayLink } from '../lib/whatsapp.js'
 
 const STATUS = {
-  new: { t: '新訂單', c: '#5b7fb0' },
-  paid: { t: '已付款', c: '#3f9d7a' },
+  new: { t: '待付款', c: '#5b7fb0' },
+  paid: { t: '已付款 · 準備中', c: '#3f9d7a' },
   shipped: { t: '已出貨', c: '#c08a2e' },
   done: { t: '完成', c: '#3f9d7a' },
   cancelled: { t: '已取消', c: '#a06b6b' },
@@ -173,6 +174,17 @@ export default function MyOrders() {
                 )}
 
                 <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+                  {o.status === 'new' && o.payment_status !== 'paid' && (
+                    <a
+                      className="pill-action"
+                      href={whatsappPayLink(o)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ background: '#25d366', borderColor: '#25d366', color: '#fff', textDecoration: 'none' }}
+                    >
+                      💬 WhatsApp Venus 付款
+                    </a>
+                  )}
                   <button className="pill-action" disabled={makingPdf === o.id} onClick={() => download(o)}>
                     {makingPdf === o.id ? '製作中…' : '下載收據'}
                   </button>

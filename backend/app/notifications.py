@@ -183,8 +183,24 @@ def format_order_email(order) -> tuple[str, str, str]:
     return subject, "\n".join(tlines), _email_html(inner)
 
 
+# Venus 嘅 WhatsApp（要同前端 src/lib/whatsapp.js 一致）
+WHATSAPP_NUMBER = "85259048782"
+WHATSAPP_DISPLAY = "+852 5904 8782"
+
+
+def whatsapp_pay_link(order) -> str:
+    """同前端一樣：自動填好訂單內容嘅 WhatsApp 連結。"""
+    from urllib.parse import quote
+
+    lines = ["你好 Venus！我喺 AURA_Sonica 落咗單，想安排付款 🐚", f"訂單編號：{order.order_no}", "商品："]
+    lines += [f"・{it.product_name} × {it.quantity} — HKD {_money(it.line_total)}" for it in order.items]
+    lines += [f"合計：HKD {_money(order.total)}", f"收貨人：{order.contact_name}"]
+    text = "\n".join(lines)
+    return f"https://wa.me/{WHATSAPP_NUMBER}?text={quote(text)}"
+
+
 def format_customer_confirmation(order) -> tuple[str, str, str]:
-    """客人落單後嘅確認信。"""
+    """客人落單後嘅確認信（電子收據）。"""
     subject = f"【AURA_Sonica】訂單確認 {order.order_no}"
     tlines = [
         f"{order.contact_name} 你好，",
@@ -206,7 +222,8 @@ def format_customer_confirmation(order) -> tuple[str, str, str]:
         f"  {order.shipping_address}",
         "",
         "送貨方式：順豐到付",
-        "付款：落單後我哋會聯絡你安排商品付款（FPS／轉數快）",
+        f"付款：請 WhatsApp Venus（{WHATSAPP_DISPLAY}）安排商品付款（FPS／轉數快）",
+        f"  一撳即傾（訂單內容已自動填好）：{whatsapp_pay_link(order)}",
         "如有疑問，可以直接回覆呢封 email。",
         "",
         "— AURA_Sonica",
@@ -230,14 +247,15 @@ def format_customer_confirmation(order) -> tuple[str, str, str]:
 </div>
 <div style="background:#f6fafb;border-radius:12px;padding:16px 18px;margin:20px 0 0;font-size:13.5px;line-height:1.95;color:#5a6f74;">
   📦 <b style="color:#3a4d51;">送貨</b>：順豐到付<br>
-  💳 <b style="color:#3a4d51;">付款</b>：我哋會盡快聯絡你安排商品付款（FPS／轉數快）
-</div>"""
+  💳 <b style="color:#3a4d51;">付款</b>：請 WhatsApp Venus（{WHATSAPP_DISPLAY}）安排商品付款（FPS／轉數快）
+</div>
+<a href="{whatsapp_pay_link(order)}" style="display:block;margin:16px 0 0;padding:13px 18px;border-radius:12px;background:#25d366;color:#fff;text-align:center;font-weight:700;text-decoration:none;">💬 WhatsApp Venus 付款（訂單內容已自動填好）</a>"""
     return subject, "\n".join(tlines), _email_html(inner)
 
 
 STATUS_LABELS = {
-    "new": "已收到",
-    "paid": "已確認收款",
+    "new": "已收到・待付款",
+    "paid": "已付款・準備出貨",
     "shipped": "已出貨",
     "done": "已完成",
     "cancelled": "已取消",

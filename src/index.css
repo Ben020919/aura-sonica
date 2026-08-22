@@ -1605,6 +1605,88 @@ a {
 .lookbook-photos.count-4 {
   grid-template-columns: repeat(4, 1fr);
 }
+/* 1–2 張圖嘅產品：置中，每格闊度同 3 欄一致 */
+.lookbook-photos.count-1 {
+  grid-template-columns: minmax(0, 380px);
+  justify-content: center;
+}
+.lookbook-photos.count-2 {
+  grid-template-columns: repeat(2, minmax(0, 380px));
+  justify-content: center;
+}
+
+/* ── 細卡 grid（T-Shirt / 文具）：一行三件，一件一張圖 ── */
+.pgrid-block {
+  margin-top: 4.5rem;
+}
+.pgrid-title {
+  text-align: center;
+  margin-bottom: 1.8rem;
+}
+.pgrid {
+  display: grid;
+  /* 幾多件都排一行（auto-flow column） */
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: clamp(0.8rem, 2vw, 1.6rem);
+}
+.pcard {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.pcard-photo {
+  overflow: hidden;
+  border-radius: 16px;
+  aspect-ratio: 3 / 4;
+  background: #eef3f9;
+}
+.pcard-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pcard:hover .pcard-photo img {
+  transform: scale(1.045);
+}
+.pcard-sub {
+  display: block;
+  margin-top: 0.85rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.pcard-name {
+  display: block;
+  margin-top: 0.18rem;
+  font-family: var(--serif);
+  font-size: 1.08rem;
+  color: var(--ink);
+}
+.pcard-price {
+  display: block;
+  margin-top: 0.22rem;
+  color: var(--ink-soft);
+}
+.pcard-price small {
+  font-size: 0.72em;
+  letter-spacing: 0.08em;
+  margin-right: 0.3em;
+}
+@media (max-width: 640px) {
+  .pgrid {
+    gap: 0.55rem;
+  }
+  .pcard-sub {
+    font-size: 0.55rem;
+  }
+  .pcard-name {
+    font-size: 0.88rem;
+  }
+}
 .lookbook-photo {
   display: block;
   overflow: hidden;
