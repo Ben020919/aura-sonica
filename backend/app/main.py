@@ -19,6 +19,9 @@ _NEW_COLUMNS = {
         ("return_reason", "TEXT"),
         ("return_note", "TEXT"),
     ],
+    "products": [
+        ("variants", "JSON"),  # 顏色等選項
+    ],
     "users": [
         ("reset_code", "VARCHAR(6)"),
         ("reset_expires", "DATETIME"),
@@ -49,6 +52,8 @@ def _auto_migrate() -> None:
                         conn.execute(
                             text(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {name} {pg_ddl}")
                         )
+            # 新加嘅 JSON list 欄：舊行係 NULL，補返 []（唔係 API 會 validation error）
+            conn.execute(text("UPDATE products SET variants = '[]' WHERE variants IS NULL"))
     except Exception as e:  # noqa: BLE001
         print(f"[migrate] 略過 auto-migrate：{e}")
 

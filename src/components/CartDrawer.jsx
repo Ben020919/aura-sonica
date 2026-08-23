@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { X, Trash2, ShoppingBag, Minus, Plus, ChevronLeft, Download, MessageCircle } from 'lucide-react'
-import { useCart } from '../context/CartContext.jsx'
+import { useCart, parseCartKey } from '../context/CartContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../lib/api.js'
 import { downloadReceiptPdf } from '../lib/receipt.js'
@@ -24,10 +24,15 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
   const { items, setQty, remove, clear } = useCart()
   const { user, updateProfile } = useAuth()
   const { products } = useCatalog()
+  // 每個 cart key（slug 或 slug::顏色）對應一行；同一件唔同色分開顯示
   const cartItems = useMemo(
     () =>
       Object.keys(items)
-        .map((slug) => products.find((p) => p.id === slug))
+        .map((key) => {
+          const { slug, variant } = parseCartKey(key)
+          const p = products.find((x) => x.id === slug)
+          return p ? { ...p, key, variant } : null
+        })
         .filter(Boolean),
     [items, products],
   )
@@ -46,7 +51,7 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
   const receiptRef = useRef(null)
 
   // 套裝價（例：postcard 2 張 $18）由 lineTotal 計
-  const total = cartItems.reduce((s, p) => s + lineTotal(p.id, p.price, items[p.id] || 0), 0)
+  const total = cartItems.reduce((s, p) => s + lineTotal(p.id, p.price, items[p.key] || 0), 0)
 
   function goCheckout() {
     if (!user) {
@@ -73,7 +78,11 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
       const order = await api('/api/orders', {
         method: 'POST',
         body: {
-          items: cartItems.map((p) => ({ product_slug: p.id, quantity: items[p.id] })),
+          items: cartItems.map((p) => ({
+            product_slug: p.id,
+            quantity: items[p.key],
+            variant: p.variant || null,
+          })),
           contact_name: form.contact_name,
           contact_phone: form.contact_phone,
           contact_email: user?.email,
@@ -138,32 +147,37 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
               ) : (
                 <>
                   {cartItems.map((p) => (
-                    <div className="fav-row" key={p.id}>
+                    <div className="fav-row" key={p.key}>
                       <img src={p.img} alt={p.name} />
                       <div className="meta">
-                        <div className="n">{p.name}</div>
+                        <div className="n">
+                          {p.name}
+                          {p.variant && (
+                            <span style={{ color: 'var(--ink-soft)', fontWeight: 400 }}> · {p.variant}</span>
+                          )}
+                        </div>
                         <div className="p">HKD {p.price}</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6 }}>
                           <button
                             className="qty-btn"
-                            onClick={() => setQty(p.id, (items[p.id] || 1) - 1)}
+                            onClick={() => setQty(p.key, (items[p.key] || 1) - 1)}
                             aria-label="減少"
                           >
                             <Minus size={13} />
                           </button>
                           <span style={{ minWidth: 18, textAlign: 'center' }}>
-                            {items[p.id]}
+                            {items[p.key]}
                           </span>
                           <button
                             className="qty-btn"
-                            onClick={() => setQty(p.id, (items[p.id] || 1) + 1)}
+                            onClick={() => setQty(p.key, (items[p.key] || 1) + 1)}
                             aria-label="增加"
                           >
                             <Plus size={13} />
                           </button>
                         </div>
                       </div>
-                      <button className="rm" onClick={() => remove(p.id)} aria-label="移除">
+                      <button className="rm" onClick={() => remove(p.key)} aria-label="移除">
                         <Trash2 size={17} />
                       </button>
                     </div>

@@ -1,9 +1,19 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
-// 購物車（同收藏 ❤️ 分開）：存本機 localStorage，items = { [slug]: qty }。
+// 購物車（同收藏 ❤️ 分開）：存本機 localStorage，items = { [key]: qty }。
+// key = slug；有顏色等選項就 = `${slug}::${variant}`（例：eye-mask::Blue），同一件唔同色分開計。
 // 結帳先要登入；購物車本身唔使登入都用得。
 const CartContext = createContext(null)
 const CART_KEY = 'aura.cart'
+
+export function cartKey(slug, variant) {
+  return variant ? `${slug}::${variant}` : slug
+}
+
+export function parseCartKey(key) {
+  const i = key.indexOf('::')
+  return i === -1 ? { slug: key, variant: null } : { slug: key.slice(0, i), variant: key.slice(i + 2) }
+}
 
 function readCart() {
   try {
@@ -21,21 +31,22 @@ export function CartProvider({ children }) {
     localStorage.setItem(CART_KEY, JSON.stringify(items))
   }, [items])
 
-  function add(slug, qty = 1) {
-    setItems((m) => ({ ...m, [slug]: Math.min(99, (m[slug] || 0) + qty) }))
+  function add(slug, qty = 1, variant = null) {
+    const key = cartKey(slug, variant)
+    setItems((m) => ({ ...m, [key]: Math.min(99, (m[key] || 0) + qty) }))
   }
-  function setQty(slug, qty) {
+  function setQty(key, qty) {
     setItems((m) => {
       const n = { ...m }
-      if (qty <= 0) delete n[slug]
-      else n[slug] = Math.min(99, qty)
+      if (qty <= 0) delete n[key]
+      else n[key] = Math.min(99, qty)
       return n
     })
   }
-  function remove(slug) {
+  function remove(key) {
     setItems((m) => {
       const n = { ...m }
-      delete n[slug]
+      delete n[key]
       return n
     })
   }

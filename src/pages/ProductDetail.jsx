@@ -15,6 +15,7 @@ export default function ProductDetail() {
   const [idx, setIdx] = useState(0)
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
+  const [variant, setVariant] = useState(null) // 顏色等選項（有先顯示）
 
   if (loading) {
     return (
@@ -36,8 +37,10 @@ export default function ProductDetail() {
 
   const gallery = product.gallery?.length ? product.gallery : [product.img]
   const fav = has(product.id)
+  const variants = product.variants || []
+  const chosen = variants.length ? variant || variants[0] : null
   function addToCart() {
-    add(product.id, qty)
+    add(product.id, qty, chosen)
     setAdded(true)
     setTimeout(() => setAdded(false), 1400)
   }
@@ -83,6 +86,32 @@ export default function ProductDetail() {
               <small>HKD</small> {product.price}
             </div>
             {product.note && <p className="pdp-note">{product.note}</p>}
+
+            {variants.length > 0 && (
+              <div className="pdp-qty" style={{ flexWrap: 'wrap' }}>
+                <span className="pdp-qty-label">顏色</span>
+                {variants.map((v) => {
+                  const on = chosen === v
+                  return (
+                    <button
+                      key={v}
+                      type="button"
+                      className="pill-action"
+                      onClick={() => setVariant(v)}
+                      aria-pressed={on}
+                      style={
+                        on
+                          ? { background: 'var(--sea-700, #2f4d73)', color: '#fff', borderColor: 'var(--sea-700, #2f4d73)' }
+                          : undefined
+                      }
+                    >
+                      {v}
+                    </button>
+                  )
+                })}
+                <span style={{ fontSize: '0.8rem', color: 'var(--ink-soft)', marginLeft: 4 }}>One Size</span>
+              </div>
+            )}
 
             <div className="pdp-qty">
               <span className="pdp-qty-label">數量</span>

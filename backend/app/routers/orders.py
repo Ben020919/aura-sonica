@@ -83,13 +83,18 @@ def create_order(
                 detail=f"「{product.name}」庫存不足（剩 {product.stock} 件）",
             )
         product.stock -= line.quantity  # 落單即扣庫存，唔會賣超
+        if line.variant and product.variants and line.variant not in product.variants:
+            raise HTTPException(
+                status_code=400, detail=f"「{product.name}」冇「{line.variant}」呢個選項"
+            )
         line_total = bundle_line_total(product.slug, product.price, line.quantity)
         subtotal += line_total
         order.items.append(
             models.OrderItem(
                 product_id=product.id,
                 product_slug=product.slug,
-                product_name=product.name,
+                # 有揀顏色就寫埋入名（後台 / email / 收據 / WhatsApp 都會顯示）
+                product_name=f"{product.name} ({line.variant})" if line.variant else product.name,
                 unit_price=product.price,
                 quantity=line.quantity,
                 line_total=line_total,

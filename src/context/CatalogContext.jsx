@@ -16,6 +16,7 @@ function mapProduct(p) {
     img: p.img,
     gallery: p.gallery || [],
     tags: p.tags || [],
+    variants: p.variants || [], // 顏色等選項（例：["Blue","White"]）
     note: p.note || '',
     stock: p.stock,
   }
