@@ -687,6 +687,31 @@ a {
   color: #a06b6b;
   border-color: rgba(160, 107, 107, 0.4);
 }
+/* 我的帳戶：訂單 / 個人資料 分頁 */
+.acct-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 1.4rem;
+  flex-wrap: wrap;
+}
+.acct-tab {
+  padding: 0.5em 1.2em;
+  border-radius: 999px;
+  border: 1px solid rgba(127, 169, 214, 0.5);
+  background: transparent;
+  color: var(--sea-700, #2f4d73);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.acct-tab:hover {
+  background: rgba(127, 169, 214, 0.12);
+}
+.acct-tab.active {
+  background: var(--sea-700, #2f4d73);
+  border-color: var(--sea-700, #2f4d73);
+  color: #fff;
+}
 .policy h2 {
   font-family: var(--serif);
   color: var(--sea-700, #2f4d73);

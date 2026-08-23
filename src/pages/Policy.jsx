@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 const NOTIFY_EMAIL = 'VENUSLEUNG412@GMAIL.COM'
 
 export default function Policy() {
@@ -27,12 +29,17 @@ export default function Policy() {
 
           <h3>四、退貨申請步驟</h3>
           <ol>
-            <li>登入官網 →「<strong>我的訂單</strong>」→ 點選「申請退貨」。</li>
+            <li>
+              登入官網 →「<Link to="/orders"><strong>我的訂單</strong></Link>」→ 喺已出貨／完成嘅訂單點選「申請退貨」。
+            </li>
             <li>填寫退貨原因並提交。</li>
             <li>待客服審核通過（1–2 個工作天）,您將收到退貨編號及寄件方式。</li>
             <li>將商品連同發票（如有）妥善包裝,依指定方式寄回。</li>
             <li>我們收到並檢查商品無誤後,將於 <strong>7 個工作天內</strong> 將款項退至您的原支付帳戶。</li>
           </ol>
+          <Link to="/orders" className="btn" style={{ display: 'inline-flex', marginTop: '0.4rem' }}>
+            前往我的訂單申請退貨 →
+          </Link>
 
           <h3>五、運費說明</h3>
           <ul>

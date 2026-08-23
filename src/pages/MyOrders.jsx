@@ -32,6 +32,7 @@ export default function MyOrders() {
   const [returnFor, setReturnFor] = useState(null)
   const [reason, setReason] = useState('')
   const [busy, setBusy] = useState(false)
+  const [tab, setTab] = useState('orders') // 'orders' | 'profile'
 
   useEffect(() => {
     if (!user) return
@@ -103,23 +104,44 @@ export default function MyOrders() {
     <section className="page doc-page">
       <div className="section-inner" style={{ maxWidth: 820 }}>
         <h2 style={{ fontFamily: 'var(--serif)', color: 'var(--sea-700)', marginBottom: '0.4rem' }}>
-          我的訂單
+          我的帳戶
         </h2>
-        <p style={{ color: 'var(--ink-soft)', marginBottom: '1.4rem', fontSize: '0.9rem' }}>
-          睇返你嘅訂單同狀態,亦可以喺呢度下載收據、申請退貨。
+        <p style={{ color: 'var(--ink-soft)', marginBottom: '1.1rem', fontSize: '0.9rem' }}>
+          {tab === 'orders'
+            ? '睇返你嘅訂單同狀態、下載收據；收到貨後 7 日內可喺該訂單撳「申請退貨」。'
+            : '儲存收貨資料，之後落單自動填好；亦可以喺呢度更改密碼。'}
         </p>
 
-        <ProfileCard />
+        <div className="acct-tabs" role="tablist">
+          <button
+            className={`acct-tab${tab === 'orders' ? ' active' : ''}`}
+            role="tab"
+            aria-selected={tab === 'orders'}
+            onClick={() => setTab('orders')}
+          >
+            📦 我的訂單
+          </button>
+          <button
+            className={`acct-tab${tab === 'profile' ? ' active' : ''}`}
+            role="tab"
+            aria-selected={tab === 'profile'}
+            onClick={() => setTab('profile')}
+          >
+            👤 個人資料
+          </button>
+        </div>
 
-        {err && <p style={{ color: '#a06b6b' }}>{err}</p>}
-        {!orders && !err && <p style={{ color: 'var(--ink-soft)' }}>載入中… 🐚</p>}
-        {orders && orders.length === 0 && (
+        {tab === 'profile' && <ProfileCard />}
+
+        {tab === 'orders' && err && <p style={{ color: '#a06b6b' }}>{err}</p>}
+        {tab === 'orders' && !orders && !err && <p style={{ color: 'var(--ink-soft)' }}>載入中… 🐚</p>}
+        {tab === 'orders' && orders && orders.length === 0 && (
           <p style={{ color: 'var(--ink-soft)' }}>
             仲未有訂單。<Link to="/shop">去商店睇下 →</Link>
           </p>
         )}
 
-        <div style={{ display: 'grid', gap: '1.2rem' }}>
+        <div style={{ display: tab === 'orders' ? 'grid' : 'none', gap: '1.2rem' }}>
           {orders?.map((o) => {
             const st = STATUS[o.status] || { t: o.status, c: '#888' }
             const canReturn = (o.status === 'shipped' || o.status === 'done') && !o.return_status
@@ -191,6 +213,11 @@ export default function MyOrders() {
                   <button className="pill-action" disabled={makingPdf === o.id} onClick={() => download(o)}>
                     {makingPdf === o.id ? '製作中…' : '下載收據'}
                   </button>
+                  {(o.status === 'new' || o.status === 'paid') && !o.return_status && (
+                    <span style={{ fontSize: '0.78rem', color: 'var(--ink-soft)', alignSelf: 'center' }}>
+                      出貨後可申請退貨（收貨 7 日內）
+                    </span>
+                  )}
                   {canReturn && (
                     <button className="pill-action" onClick={() => setReturnFor(o)}>
                       申請退貨
@@ -207,7 +234,14 @@ export default function MyOrders() {
           })}
         </div>
 
-        <p style={{ marginTop: '2rem', fontSize: '0.82rem', color: 'var(--ink-soft)' }}>
+        <p
+          style={{
+            marginTop: '2rem',
+            fontSize: '0.82rem',
+            color: 'var(--ink-soft)',
+            display: tab === 'orders' ? undefined : 'none',
+          }}
+        >
           退貨前請睇下{' '}
           <Link
             to="/policy"
