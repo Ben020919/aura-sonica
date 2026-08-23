@@ -567,6 +567,7 @@ function ProductsPanel() {
       {editing && (
         <ProductEditor
           product={editing === 'new' ? null : editing}
+          products={products}
           categories={categories}
           onCategoryCreated={(c) => setCategories((cs) => [...cs, c])}
           onClose={() => setEditing(null)}
@@ -580,8 +581,13 @@ function ProductsPanel() {
   )
 }
 
-function ProductEditor({ product, categories, onCategoryCreated, onClose, onSaved }) {
+function ProductEditor({ product, products = [], categories, onCategoryCreated, onClose, onSaved }) {
   const isNew = !product
+  // 擺喺邊：只列上架中嘅商品（唔計自己），順序 = Store 排序
+  const visible = products.filter((p) => p.is_active)
+  const others = visible.filter((p) => p.id !== product?.id)
+  const prevIdx = product ? visible.findIndex((p) => p.id === product.id) - 1 : others.length - 1
+  const initialAfter = prevIdx >= 0 ? (product ? visible[prevIdx]?.slug : others[prevIdx]?.slug) || '' : ''
   const [form, setForm] = useState({
     slug: product?.slug || '',
     name: product?.name || '',
@@ -589,7 +595,10 @@ function ProductEditor({ product, categories, onCategoryCreated, onClose, onSave
     category: product?.category || categories[0]?.slug || 'bag',
     price: product?.price ?? 0,
     stock: product?.stock ?? 0,
-    img: product?.img || '',
+    // 相簿：多張圖，第一張就係主圖
+    gallery: product?.gallery?.length ? product.gallery : product?.img ? [product.img] : [],
+    variants: (product?.variants || []).join(', '),
+    after_slug: initialAfter, // '' = 最前
     note: product?.note || '',
     is_active: product?.is_active ?? true,
   })
@@ -600,22 +609,38 @@ function ProductEditor({ product, categories, onCategoryCreated, onClose, onSave
 
   const up = (k, v) => setForm((f) => ({ ...f, [k]: v }))
 
+  // 上載（可一次揀幾張），加落相簿最後
   async function onPickImage(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = [...(e.target.files || [])]
+    if (!files.length) return
     setUploading(true)
     setErr('')
     try {
-      const fd = new FormData()
-      fd.append('file', file)
-      const r = await apiUpload('/api/admin/upload', fd)
-      up('img', r.url)
+      for (const file of files) {
+        const fd = new FormData()
+        fd.append('file', file)
+        const r = await apiUpload('/api/admin/upload', fd)
+        setForm((f) => ({ ...f, gallery: [...f.gallery, r.url] }))
+      }
     } catch (e2) {
       setErr(e2.message || '上載失敗')
     } finally {
       setUploading(false)
       if (fileRef.current) fileRef.current.value = '' // 容許再揀同一個檔
     }
+  }
+
+  function removeImage(i) {
+    setForm((f) => ({ ...f, gallery: f.gallery.filter((_, k) => k !== i) }))
+  }
+  function moveImage(i, dir) {
+    setForm((f) => {
+      const g = [...f.gallery]
+      const j = i + dir
+      if (j < 0 || j >= g.length) return f
+      ;[g[i], g[j]] = [g[j], g[i]]
+      return { ...f, gallery: g }
+    })
   }
 
   async function addCategory() {
@@ -644,7 +669,13 @@ function ProductEditor({ product, categories, onCategoryCreated, onClose, onSave
         category: form.category,
         price: Number(form.price),
         stock: Number(form.stock),
-        img: form.img || null,
+        img: form.gallery[0] || null, // 第一張 = 主圖
+        gallery: form.gallery,
+        variants: form.variants
+          .split(/[,，、]/)
+          .map((s) => s.trim())
+          .filter(Boolean),
+        after_slug: form.after_slug, // '' = 最前
         note: form.note || null,
         is_active: form.is_active,
       }
@@ -742,25 +773,40 @@ function ProductEditor({ product, categories, onCategoryCreated, onClose, onSave
           </label>
         </div>
         <div className="admin-imgfield">
-          <span>商品圖片</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 6 }}>
-            {form.img ? (
-              <img
-                src={form.img}
-                alt=""
-                style={{
-                  width: 64,
-                  height: 64,
-                  objectFit: 'cover',
-                  borderRadius: 8,
-                  border: '1px solid #d9e2f0',
-                }}
-              />
-            ) : (
+          <span>
+            商品圖片{' '}
+            <small style={{ color: '#8a9bb5', fontWeight: 400 }}>
+              （可以多張；第一張係主圖，Store 會顯示晒全部，最多 4 張）
+            </small>
+          </span>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginTop: 6, flexWrap: 'wrap' }}>
+            {form.gallery.map((src, i) => (
+              <div key={src + i} style={{ textAlign: 'center' }}>
+                <img
+                  src={src}
+                  alt=""
+                  style={{
+                    width: 72,
+                    height: 72,
+                    objectFit: 'cover',
+                    borderRadius: 8,
+                    border: i === 0 ? '2px solid #5b7fb0' : '1px solid #d9e2f0',
+                    display: 'block',
+                  }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 2, marginTop: 3 }}>
+                  <button type="button" className="admin-btn ghost sm" onClick={() => moveImage(i, -1)} disabled={i === 0} title="向前">◀</button>
+                  <button type="button" className="admin-btn ghost sm" onClick={() => removeImage(i)} title="刪走呢張" style={{ color: '#a06b6b' }}>✕</button>
+                  <button type="button" className="admin-btn ghost sm" onClick={() => moveImage(i, 1)} disabled={i === form.gallery.length - 1} title="向後">▶</button>
+                </div>
+                {i === 0 && <small style={{ color: '#5b7fb0', fontSize: 10 }}>主圖</small>}
+              </div>
+            ))}
+            {form.gallery.length === 0 && (
               <div
                 style={{
-                  width: 64,
-                  height: 64,
+                  width: 72,
+                  height: 72,
                   borderRadius: 8,
                   border: '1px dashed #c3d1e6',
                   display: 'grid',
@@ -777,18 +823,39 @@ function ProductEditor({ product, categories, onCategoryCreated, onClose, onSave
               className="admin-btn ghost sm"
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
+              style={{ alignSelf: 'center' }}
             >
-              {uploading ? '上載中…' : form.img ? '換圖片' : '上載圖片'}
+              {uploading ? '上載中…' : '＋ 上載圖片'}
             </button>
             <input
               ref={fileRef}
               type="file"
               accept="image/*"
+              multiple
               onChange={onPickImage}
               style={{ display: 'none' }}
             />
           </div>
         </div>
+        <label>
+          擺喺邊（Store 排序）
+          <select value={form.after_slug} onChange={(e) => up('after_slug', e.target.value)}>
+            <option value="">最前</option>
+            {others.map((p) => (
+              <option key={p.id} value={p.slug}>
+                排喺「{p.name}{p.name_en && p.name_en !== p.name ? ` · ${p.name_en}` : ''}」之後
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          顏色／款式選項（可選，逗號分隔，例如 Blue, White）
+          <input
+            value={form.variants}
+            onChange={(e) => up('variants', e.target.value)}
+            placeholder="留空 = 冇選項"
+          />
+        </label>
         <label>
           介紹（可選）
           <textarea

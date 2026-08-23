@@ -176,6 +176,8 @@ class ProductCreate(BaseModel):
     stock: int = Field(default=0, ge=0)
     is_active: bool = True
     sort_order: int = 0
+    # 擺喺邊：某件商品嘅 slug（排喺佢之後）、"" = 最前、None = 唔改
+    after_slug: str | None = None
 
 
 class ProductUpdate(BaseModel):
@@ -191,6 +193,7 @@ class ProductUpdate(BaseModel):
     stock: int | None = Field(default=None, ge=0)
     is_active: bool | None = None
     sort_order: int | None = None
+    after_slug: str | None = None  # 擺喺邊（同 ProductCreate）
 
 
 class CategoryCreate(BaseModel):

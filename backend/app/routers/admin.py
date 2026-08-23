@@ -137,12 +137,33 @@ def all_products(db: Session = Depends(get_db)):
     )
 
 
+def _place_after(db: Session, product: models.Product, after_slug: str) -> None:
+    """將 product 排喺 after_slug 嗰件之後（"" = 最前），然後全部重新編號 1..n。"""
+    others = [
+        p for p in db.query(models.Product)
+        .order_by(models.Product.sort_order, models.Product.id)
+        .all()
+        if p.id != product.id
+    ]
+    if after_slug == "":
+        idx = 0
+    else:
+        idx = next((i + 1 for i, p in enumerate(others) if p.slug == after_slug), len(others))
+    others.insert(idx, product)
+    for n, p in enumerate(others, start=1):
+        p.sort_order = n
+
+
 @router.post("/products", response_model=schemas.ProductOut, status_code=201)
 def create_product(payload: schemas.ProductCreate, db: Session = Depends(get_db)):
     if db.query(models.Product).filter(models.Product.slug == payload.slug).first():
         raise HTTPException(status_code=409, detail=f"slug 已存在：{payload.slug}")
-    product = models.Product(**payload.model_dump())
+    data = payload.model_dump(exclude={"after_slug"})
+    product = models.Product(**data)
     db.add(product)
+    db.flush()
+    if payload.after_slug is not None:
+        _place_after(db, product, payload.after_slug)
     db.commit()
     db.refresh(product)
     return product
@@ -157,8 +178,12 @@ def update_product(
     product = db.query(models.Product).filter(models.Product.id == product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="搵唔到商品")
-    for key, value in payload.model_dump(exclude_unset=True).items():
+    data = payload.model_dump(exclude_unset=True)
+    after_slug = data.pop("after_slug", None)
+    for key, value in data.items():
         setattr(product, key, value)
+    if after_slug is not None:
+        _place_after(db, product, after_slug)
     db.commit()
     db.refresh(product)
     return product
