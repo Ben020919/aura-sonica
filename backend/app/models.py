@@ -70,6 +70,7 @@ class Product(Base):
     gallery = Column(JSON, default=list)  # list[str] 圖片路徑
     tags = Column(JSON, default=list)  # list[str]
     variants = Column(JSON, default=list)  # list[str] 顏色等選項（例：["Blue", "White"]），落單時揀
+    sizes = Column(JSON, default=list)  # list[str] 尺碼選項（例：["S", "M", "L", "XL"]），落單時揀
     note = Column(Text)
     stock = Column(Integer, default=0, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)

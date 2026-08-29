@@ -16,6 +16,7 @@ export default function ProductDetail() {
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
   const [variant, setVariant] = useState(null) // 顏色等選項（有先顯示）
+  const [size, setSize] = useState(null) // 尺碼（有先顯示）
 
   if (loading) {
     return (
@@ -38,9 +39,11 @@ export default function ProductDetail() {
   const gallery = product.gallery?.length ? product.gallery : [product.img]
   const fav = has(product.id)
   const variants = product.variants || []
+  const sizes = product.sizes || []
   const chosen = variants.length ? variant || variants[0] : null
+  const chosenSize = sizes.length ? size || sizes[0] : null
   function addToCart() {
-    add(product.id, qty, chosen)
+    add(product.id, qty, chosen, chosenSize)
     setAdded(true)
     setTimeout(() => setAdded(false), 1400)
   }
@@ -109,7 +112,34 @@ export default function ProductDetail() {
                     </button>
                   )
                 })}
-                <span style={{ fontSize: '0.8rem', color: 'var(--ink-soft)', marginLeft: 4 }}>One Size</span>
+                {sizes.length === 0 && (
+                  <span style={{ fontSize: '0.8rem', color: 'var(--ink-soft)', marginLeft: 4 }}>One Size</span>
+                )}
+              </div>
+            )}
+
+            {sizes.length > 0 && (
+              <div className="pdp-qty" style={{ flexWrap: 'wrap' }}>
+                <span className="pdp-qty-label">尺碼</span>
+                {sizes.map((s) => {
+                  const on = chosenSize === s
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      className="pill-action"
+                      onClick={() => setSize(s)}
+                      aria-pressed={on}
+                      style={
+                        on
+                          ? { background: 'var(--sea-700, #2f4d73)', color: '#fff', borderColor: 'var(--sea-700, #2f4d73)' }
+                          : undefined
+                      }
+                    >
+                      {s}
+                    </button>
+                  )
+                })}
               </div>
             )}
 

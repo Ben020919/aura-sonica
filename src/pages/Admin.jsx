@@ -598,6 +598,7 @@ function ProductEditor({ product, products = [], categories, onCategoryCreated, 
     // 相簿：多張圖，第一張就係主圖
     gallery: product?.gallery?.length ? product.gallery : product?.img ? [product.img] : [],
     variants: (product?.variants || []).join(', '),
+    sizes: (product?.sizes || []).join(', '),
     after_slug: initialAfter, // '' = 最前
     note: product?.note || '',
     is_active: product?.is_active ?? true,
@@ -672,6 +673,10 @@ function ProductEditor({ product, products = [], categories, onCategoryCreated, 
         img: form.gallery[0] || null, // 第一張 = 主圖
         gallery: form.gallery,
         variants: form.variants
+          .split(/[,，、]/)
+          .map((s) => s.trim())
+          .filter(Boolean),
+        sizes: form.sizes
           .split(/[,，、]/)
           .map((s) => s.trim())
           .filter(Boolean),
@@ -854,6 +859,14 @@ function ProductEditor({ product, products = [], categories, onCategoryCreated, 
             value={form.variants}
             onChange={(e) => up('variants', e.target.value)}
             placeholder="留空 = 冇選項"
+          />
+        </label>
+        <label>
+          尺碼選項（可選，逗號分隔，例如 S, M, L, XL, XXL, 3XL）
+          <input
+            value={form.sizes}
+            onChange={(e) => up('sizes', e.target.value)}
+            placeholder="留空 = 冇尺碼（One Size）"
           />
         </label>
         <label>

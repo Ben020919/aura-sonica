@@ -43,6 +43,7 @@ class ProductOut(BaseModel):
     gallery: list[str] = []
     tags: list[str] = []
     variants: list[str] = []
+    sizes: list[str] = []
     note: str | None = None
     stock: int
     is_active: bool
@@ -104,6 +105,7 @@ class OrderItemIn(BaseModel):
     product_slug: str
     quantity: int = Field(ge=1, le=99)
     variant: str | None = None  # 顏色等選項（例：Blue）
+    size: str | None = None  # 尺碼（例：M）
 
 
 class OrderCreate(BaseModel):
@@ -172,6 +174,7 @@ class ProductCreate(BaseModel):
     gallery: list[str] = []
     tags: list[str] = []
     variants: list[str] = []
+    sizes: list[str] = []
     note: str | None = None
     stock: int = Field(default=0, ge=0)
     is_active: bool = True
@@ -189,6 +192,7 @@ class ProductUpdate(BaseModel):
     gallery: list[str] | None = None
     tags: list[str] | None = None
     variants: list[str] | None = None
+    sizes: list[str] | None = None
     note: str | None = None
     stock: int | None = Field(default=None, ge=0)
     is_active: bool | None = None

@@ -87,14 +87,19 @@ def create_order(
             raise HTTPException(
                 status_code=400, detail=f"「{product.name}」冇「{line.variant}」呢個選項"
             )
+        if line.size and product.sizes and line.size not in product.sizes:
+            raise HTTPException(
+                status_code=400, detail=f"「{product.name}」冇「{line.size}」呢個尺碼"
+            )
+        opts = " / ".join(o for o in (line.variant, line.size) if o)
         line_total = bundle_line_total(product.slug, product.price, line.quantity)
         subtotal += line_total
         order.items.append(
             models.OrderItem(
                 product_id=product.id,
                 product_slug=product.slug,
-                # 有揀顏色就寫埋入名（後台 / email / 收據 / WhatsApp 都會顯示）
-                product_name=f"{product.name} ({line.variant})" if line.variant else product.name,
+                # 有揀顏色／尺碼就寫埋入名（後台 / email / 收據 / WhatsApp 都會顯示）
+                product_name=f"{product.name} ({opts})" if opts else product.name,
                 unit_price=product.price,
                 quantity=line.quantity,
                 line_total=line_total,

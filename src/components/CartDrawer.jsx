@@ -29,9 +29,9 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
     () =>
       Object.keys(items)
         .map((key) => {
-          const { slug, variant } = parseCartKey(key)
+          const { slug, variant, size } = parseCartKey(key)
           const p = products.find((x) => x.id === slug)
-          return p ? { ...p, key, variant } : null
+          return p ? { ...p, key, variant, size } : null
         })
         .filter(Boolean),
     [items, products],
@@ -82,6 +82,7 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
             product_slug: p.id,
             quantity: items[p.key],
             variant: p.variant || null,
+            size: p.size || null,
           })),
           contact_name: form.contact_name,
           contact_phone: form.contact_phone,
@@ -154,6 +155,9 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
                           {p.name}
                           {p.variant && (
                             <span style={{ color: 'var(--ink-soft)', fontWeight: 400 }}> · {p.variant}</span>
+                          )}
+                          {p.size && (
+                            <span style={{ color: 'var(--ink-soft)', fontWeight: 400 }}> · {p.size}</span>
                           )}
                         </div>
                         <div className="p">HKD {p.price}</div>

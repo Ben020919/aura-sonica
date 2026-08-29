@@ -17,6 +17,7 @@ function mapProduct(p) {
     gallery: p.gallery || [],
     tags: p.tags || [],
     variants: p.variants || [], // 顏色等選項（例：["Blue","White"]）
+    sizes: p.sizes || [], // 尺碼選項（例：["S","M","L","XL"]）
     note: p.note || '',
     stock: p.stock,
   }
