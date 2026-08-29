@@ -1899,6 +1899,7 @@ a {
   line-height: 1.9;
   font-family: var(--serif-tc);
   margin-bottom: 1.6rem;
+  white-space: pre-line; /* 後台介紹打嘅換行，產品頁照樣顯示 */
 }
 .pdp-qty {
   display: flex;
