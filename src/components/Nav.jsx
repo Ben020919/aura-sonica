@@ -1,8 +1,9 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { Search, Heart, ShoppingBag, LogOut } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useFavorites } from '../context/FavoritesContext.jsx'
 import { useCart } from '../context/CartContext.jsx'
+import Announce from './Announce.jsx'
 
 // 牛仔布資料夾標籤導覽（分頁）：撳頂部標籤 = 去到嗰一頁。
 const TABS = [
@@ -18,9 +19,13 @@ export default function Nav({ onSearch, onFavorites, onCart, onAuth }) {
   const { user, logout } = useAuth()
   const { count } = useFavorites()
   const { count: cartCount } = useCart()
+  const { pathname } = useLocation()
+  // 公告橫幅：只出喺 忘聲海（/）同 商店（/shop）
+  const showAnnounce = pathname === '/' || pathname === '/shop'
 
   return (
     <nav className="denim-nav">
+      {showAnnounce && <Announce />}
       <div className="denim-bar">
         <NavLink to="/" className="brand">
           AURA<span style={{ color: '#c7d5ea' }}>_</span>Sonica

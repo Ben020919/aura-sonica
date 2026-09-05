@@ -210,6 +210,65 @@ a {
   border: 1px solid rgba(255, 255, 255, 0.7);
 }
 
+/* ── 頂部公告橫幅（不停由右向左捲）──────────────── */
+.announce {
+  --announce-h: 34px;
+  height: var(--announce-h);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: var(--foam);
+  border-bottom: 1px solid rgba(127, 169, 214, 0.35);
+  color: var(--sea-700);
+  font-family: var(--sans);
+  font-size: 0.74rem;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.announce-track {
+  display: flex;
+  /* 兩份一樣嘅內容，捲到 -50%（即係啱啱一份）就無縫接返轉頭 */
+  animation: announce-scroll 34s linear infinite;
+}
+.announce-half {
+  display: flex;
+}
+.announce-item::after {
+  content: '\2022'; /* 分隔點，同 Hollister 果種 */
+  margin: 0 2.4rem;
+  color: var(--aura-300);
+}
+@keyframes announce-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* 用戶關咗動畫：唔捲，靜態顯示 */
+  .announce-track {
+    animation: none;
+  }
+}
+@media (max-width: 860px) {
+  .announce {
+    --announce-h: 30px;
+    font-size: 0.66rem;
+  }
+  .announce-item::after {
+    margin: 0 1.6rem;
+  }
+}
+
+/* 有橫幅時，內文要多讓返條 bar 嘅高度（唔係會被 nav 遮住） */
+body.has-announce .page {
+  padding-top: calc(150px + 34px);
+}
+@media (max-width: 860px) {
+  body.has-announce .page {
+    padding-top: calc(150px + 30px);
+  }
+}
+
 /* ── 牛仔布頂部導覽（資料夾標籤向下掛） ─────────────── */
 .denim-nav {
   position: fixed;
