@@ -23,7 +23,7 @@ const inputStyle = {
 export default function CartDrawer({ onClose, onRequestLogin }) {
   const { items, setQty, remove, clear } = useCart()
   const { user, updateProfile } = useAuth()
-  const { products } = useCatalog()
+  const { products, settings } = useCatalog()
   // 每個 cart key（slug 或 slug::顏色）對應一行；同一件唔同色分開顯示
   const cartItems = useMemo(
     () =>
@@ -52,6 +52,10 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
 
   // 套裝價（例：postcard 2 張 $18）由 lineTotal 計
   const total = cartItems.reduce((s, p) => s + lineTotal(p.id, p.price, items[p.key] || 0), 0)
+  // 免運費：商品合計夠門檻就免，唔夠就順豐到付（門檻喺後台改，後端落單時會再計一次）
+  const freeShippingMin = settings?.free_shipping_min ?? 200
+  const freeShipping = total >= freeShippingMin
+  const shortfall = Math.max(0, Math.ceil(freeShippingMin - total))
 
   function goCheckout() {
     if (!user) {
@@ -201,6 +205,23 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
                       HKD {total}
                     </span>
                   </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      marginTop: '0.5rem',
+                      fontSize: '0.85rem',
+                      color: freeShipping ? '#2f7a5b' : 'var(--ink-soft)',
+                    }}
+                  >
+                    <span>運費</span>
+                    <span>{freeShipping ? '免運費 🎉' : '順豐到付'}</span>
+                  </div>
+                  {!freeShipping && (
+                    <p style={{ fontSize: '0.78rem', color: 'var(--ink-soft)', marginTop: '0.35rem' }}>
+                      仲差 HKD {shortfall} 就免運費
+                    </p>
+                  )}
 
                   <button
                     className="btn"
@@ -296,6 +317,18 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
                   HKD {total}
                 </span>
               </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginTop: '0.5rem',
+                  fontSize: '0.85rem',
+                  color: freeShipping ? '#2f7a5b' : 'var(--ink-soft)',
+                }}
+              >
+                <span>運費</span>
+                <span>{freeShipping ? '免運費 🎉' : '順豐到付'}</span>
+              </div>
 
               <button
                 className="btn"
@@ -306,7 +339,15 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
                 {submitting ? '落單中…' : `確認落單 · HKD ${total}`}
               </button>
               <p style={{ fontSize: '0.8rem', color: 'var(--ink-soft)', marginTop: '0.8rem', lineHeight: 1.6 }}>
-                🚚 送貨：<strong>順豐到付</strong>。落單後 WhatsApp Venus 安排商品付款（FPS／轉數快）🌊
+                🚚 送貨：
+                {freeShipping ? (
+                  <strong>免運費</strong>
+                ) : (
+                  <>
+                    <strong>順豐到付</strong>（仲差 HKD {shortfall} 就免運費）
+                  </>
+                )}
+                。落單後 WhatsApp Venus 安排商品付款（FPS／轉數快）🌊
               </p>
             </form>
           </>
@@ -437,7 +478,7 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#5b6b85', marginTop: 4 }}>
                     <span>送貨</span>
-                    <span>順豐到付</span>
+                    <span>{placed.shipping_mode === 'free' ? '免運費' : '順豐到付'}</span>
                   </div>
                   <div style={{ marginTop: 16, fontSize: 12, color: '#5b6b85', lineHeight: 1.8 }}>
                     <div>收貨人：{placed.contact_name}　{placed.contact_phone}</div>

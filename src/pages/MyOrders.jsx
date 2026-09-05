@@ -187,7 +187,7 @@ export default function MyOrders() {
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--line, #eef3f9)', paddingTop: 8, fontWeight: 600, color: 'var(--sea-700)' }}>
-                  <span>合計（送貨順豐到付）</span>
+                  <span>合計（送貨{o.shipping_mode === 'free' ? '免運費' : '順豐到付'}）</span>
                   <span>HKD {o.total}</span>
                 </div>
 

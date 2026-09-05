@@ -13,6 +13,7 @@ from .routers import admin, auth, favorites, health, orders, products, settings 
 # （Prod Postgres 由 create_all 起齊；呢個只喺 SQLite 行、失敗都唔阻啟動。）
 _NEW_COLUMNS = {
     "orders": [
+        ("shipping_mode", "VARCHAR(12)"),
         ("order_no", "VARCHAR(20)"),
         ("return_status", "VARCHAR(20)"),
         ("return_no", "VARCHAR(24)"),
@@ -22,6 +23,9 @@ _NEW_COLUMNS = {
     "products": [
         ("variants", "JSON"),  # 顏色等選項
         ("sizes", "JSON"),  # 尺碼選項
+    ],
+    "site_settings": [
+        ("free_shipping_min", "NUMERIC(10, 2)"),
     ],
     "users": [
         ("reset_code", "VARCHAR(6)"),
@@ -56,6 +60,9 @@ def _auto_migrate() -> None:
             # 新加嘅 JSON list 欄：舊行係 NULL，補返 []（唔係 API 會 validation error）
             conn.execute(text("UPDATE products SET variants = '[]' WHERE variants IS NULL"))
             conn.execute(text("UPDATE products SET sizes = '[]' WHERE sizes IS NULL"))
+            conn.execute(
+                text("UPDATE site_settings SET free_shipping_min = 200 WHERE free_shipping_min IS NULL")
+            )
     except Exception as e:  # noqa: BLE001
         print(f"[migrate] 略過 auto-migrate：{e}")
 

@@ -110,6 +110,7 @@ class SiteSettingOut(BaseModel):
     announce_speed: int
     announce_bg: str
     announce_color: str
+    free_shipping_min: float
 
 
 class SiteSettingUpdate(BaseModel):
@@ -119,6 +120,7 @@ class SiteSettingUpdate(BaseModel):
     announce_speed: int | None = Field(default=None, ge=5, le=120)
     announce_bg: str | None = None
     announce_color: str | None = None
+    free_shipping_min: float | None = Field(default=None, ge=0)
 
 
 # ── 訂單 ────────────────────────────────────
@@ -158,6 +160,7 @@ class OrderOut(BaseModel):
     payment_method: str | None = None
     subtotal: float
     shipping_fee: float
+    shipping_mode: str | None = None
     total: float
     currency: str
     contact_name: str

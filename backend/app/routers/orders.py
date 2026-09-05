@@ -9,6 +9,7 @@ from .. import models, schemas
 from ..config import settings
 from ..database import get_db
 from ..deps import get_current_user
+from .settings import get_or_create as get_site_settings
 from ..notifications import (
     format_customer_confirmation,
     format_order_email,
@@ -106,9 +107,12 @@ def create_order(
             )
         )
 
+    # 運費：商品合計夠門檻就免運費，唔夠就到付（客人收貨時畀速遞，唔計入訂單金額）
+    site = get_site_settings(db)
     order.subtotal = subtotal
-    order.shipping_fee = settings.shipping_fee
-    order.total = subtotal + settings.shipping_fee
+    order.shipping_fee = 0
+    order.shipping_mode = "free" if subtotal >= site.free_shipping_min else "collect"
+    order.total = subtotal
 
     db.add(order)
     db.commit()

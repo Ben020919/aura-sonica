@@ -95,6 +95,11 @@ def _money(v) -> str:
     return f"{v:,.0f}" if v == int(v) else f"{v:,.2f}"
 
 
+def _shipping_label(order) -> str:
+    """免運費 / 順豐到付。舊訂單冇記低模式（NULL），照舊當到付。"""
+    return "免運費" if getattr(order, "shipping_mode", None) == "free" else "順豐到付"
+
+
 def _email_html(inner: str) -> str:
     """品牌化 HTML 外殼：海洋漸變 header + 白卡 + footer。"""
     return f"""\
@@ -159,7 +164,7 @@ def format_order_email(order) -> tuple[str, str, str]:
     tlines += [
         "",
         f"商品合計：HKD {_money(order.total)}",
-        "送貨：順豐到付",
+        f"送貨：{_shipping_label(order)}",
         "",
         f"付款：{order.payment_method}（{order.payment_status}）",
         "",
@@ -179,7 +184,7 @@ def format_order_email(order) -> tuple[str, str, str]:
   <tr><td style="padding:14px 0 0;font-weight:700;">商品合計</td>
       <td style="padding:14px 0 0;text-align:right;font-weight:700;color:#1f4a54;">HKD {_money(order.total)}</td></tr>
 </table>
-<p style="margin:18px 0 0;color:#6b8085;font-size:13.5px;">送貨：順豐到付　·　付款：{esc(order.payment_method)}（{esc(order.payment_status)}）</p>"""
+<p style="margin:18px 0 0;color:#6b8085;font-size:13.5px;">送貨：{esc(_shipping_label(order))}　·　付款：{esc(order.payment_method)}（{esc(order.payment_status)}）</p>"""
     return subject, "\n".join(tlines), _email_html(inner)
 
 
@@ -221,7 +226,7 @@ def format_customer_confirmation(order) -> tuple[str, str, str]:
         f"  {order.contact_name} / {order.contact_phone}",
         f"  {order.shipping_address}",
         "",
-        "送貨方式：順豐到付",
+        f"送貨方式：{_shipping_label(order)}",
         f"付款：請 WhatsApp Venus（{WHATSAPP_DISPLAY}）安排商品付款（FPS／轉數快）",
         f"  一撳即傾（訂單內容已自動填好）：{whatsapp_pay_link(order)}",
         "如有疑問，可以直接回覆呢封 email。",
@@ -246,7 +251,7 @@ def format_customer_confirmation(order) -> tuple[str, str, str]:
   {esc(order.shipping_address)}
 </div>
 <div style="background:#f6fafb;border-radius:12px;padding:16px 18px;margin:20px 0 0;font-size:13.5px;line-height:1.95;color:#5a6f74;">
-  📦 <b style="color:#3a4d51;">送貨</b>：順豐到付<br>
+  📦 <b style="color:#3a4d51;">送貨</b>：{esc(_shipping_label(order))}<br>
   💳 <b style="color:#3a4d51;">付款</b>：請 WhatsApp Venus（{WHATSAPP_DISPLAY}）安排商品付款（FPS／轉數快）
 </div>
 <a href="{whatsapp_pay_link(order)}" style="display:block;margin:16px 0 0;padding:13px 18px;border-radius:12px;background:#25d366;color:#fff;text-align:center;font-weight:700;text-decoration:none;">💬 WhatsApp Venus 付款（訂單內容已自動填好）</a>"""

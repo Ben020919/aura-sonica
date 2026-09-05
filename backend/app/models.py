@@ -91,6 +91,8 @@ class SiteSetting(Base):
     announce_speed = Column(Integer, default=18, nullable=False)  # 行一個螢幕闊度要幾多秒
     announce_bg = Column(String(20), default="#e9f1fa", nullable=False)
     announce_color = Column(String(20), default="#2f4d73", nullable=False)
+    # 免運門檻：商品合計去到呢個數就免運費，唔夠就運費到付
+    free_shipping_min = Column(Numeric(10, 2), default=200, nullable=False)
     updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow, nullable=False)
 
 
@@ -111,6 +113,9 @@ class Order(Base):
 
     subtotal = Column(Numeric(10, 2), default=0, nullable=False)
     shipping_fee = Column(Numeric(10, 2), default=0, nullable=False)
+    # "free" = 免運費（夠門檻）｜"collect" = 運費到付（唔夠）
+    # 舊訂單係 NULL（嗰陣未有呢個規則），前台唔會顯示運費行
+    shipping_mode = Column(String(12))
     total = Column(Numeric(10, 2), default=0, nullable=False)
     currency = Column(String(8), default="HKD", nullable=False)
 

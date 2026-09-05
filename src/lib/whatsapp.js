@@ -10,6 +10,7 @@ export function whatsappPayLink(order) {
     '商品：',
     ...(order.items || []).map((it) => `・${it.product_name} × ${it.quantity} — HKD ${it.line_total}`),
     `合計：HKD ${order.total}`,
+    `運費：${order.shipping_mode === 'free' ? '免運費' : '順豐到付'}`,
     `收貨人：${order.contact_name}`,
   ]
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`

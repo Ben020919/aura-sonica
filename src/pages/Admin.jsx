@@ -86,7 +86,7 @@ export default function Admin() {
           className={tab === 'announce' ? 'active' : ''}
           onClick={() => setTab('announce')}
         >
-          橫幅
+          設定
         </button>
       </div>
 
@@ -444,6 +444,7 @@ function AnnouncePanel() {
           announce_speed: Number(form.announce_speed),
           announce_bg: form.announce_bg,
           announce_color: form.announce_color,
+          free_shipping_min: Number(form.free_shipping_min),
         },
       })
       setForm(saved)
@@ -529,6 +530,22 @@ function AnnouncePanel() {
           />
         </label>
       </div>
+
+      <hr style={{ border: 0, borderTop: '1px solid #eef3f9', margin: '6px 0' }} />
+      <h3>運費</h3>
+      <label>
+        免運門檻（HKD）
+        <input
+          type="number"
+          min="0"
+          value={form.free_shipping_min}
+          onChange={(e) => up('free_shipping_min', e.target.value)}
+        />
+      </label>
+      <p className="muted" style={{ fontSize: '0.8rem', margin: 0, lineHeight: 1.7 }}>
+        商品合計夠呢個數 → 客人見到「免運費」；唔夠 → 「順豐到付」（運費客人收貨時畀速遞，
+        唔會計入訂單金額）。落單一刻會計一次同埋記入訂單，之後改門檻唔會影響舊單。
+      </p>
 
       {err && <div className="admin-err">{err}</div>}
       <button type="submit" className="admin-btn" disabled={saving}>
