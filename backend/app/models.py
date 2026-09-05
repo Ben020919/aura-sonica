@@ -88,7 +88,7 @@ class SiteSetting(Base):
     announce_enabled = Column(Boolean, default=True, nullable=False)
     announce_text = Column(Text, default="", nullable=False)
     announce_font_size = Column(Integer, default=12, nullable=False)  # px
-    announce_speed = Column(Integer, default=34, nullable=False)  # 捲一圈幾多秒
+    announce_speed = Column(Integer, default=18, nullable=False)  # 行一個螢幕闊度要幾多秒
     announce_bg = Column(String(20), default="#e9f1fa", nullable=False)
     announce_color = Column(String(20), default="#2f4d73", nullable=False)
     updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow, nullable=False)

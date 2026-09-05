@@ -116,7 +116,7 @@ class SiteSettingUpdate(BaseModel):
     announce_enabled: bool | None = None
     announce_text: str | None = None
     announce_font_size: int | None = Field(default=None, ge=8, le=32)
-    announce_speed: int | None = Field(default=None, ge=5, le=200)
+    announce_speed: int | None = Field(default=None, ge=5, le=120)
     announce_bg: str | None = None
     announce_color: str | None = None
 

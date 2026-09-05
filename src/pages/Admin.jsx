@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api, apiUpload } from '../lib/api.js'
+import { AnnounceBar } from '../components/Announce.jsx'
 import '../styles/admin.css'
 
 const ORDER_STATUS = [
@@ -456,7 +457,6 @@ function AnnouncePanel() {
 
   if (!form) return err ? <p className="admin-err">{err}</p> : <p className="muted">載入中…</p>
 
-  const preview = form.announce_text.trim() || '（未有文字）'
   return (
     <form className="admin-editor" onSubmit={save}>
       <h3>頂部公告橫幅</h3>
@@ -464,30 +464,10 @@ function AnnouncePanel() {
         出喺「忘聲海」同「商店」兩頁最頂，不停由右向左捲。
       </p>
 
-      <div
-        className="announce"
-        style={{
-          '--announce-h': `${Math.round(form.announce_font_size * 2.6)}px`,
-          '--announce-font': `${form.announce_font_size}px`,
-          '--announce-speed': `${form.announce_speed}s`,
-          '--announce-bg': form.announce_bg,
-          '--announce-color': form.announce_color,
-          borderRadius: 8,
-          opacity: form.announce_enabled ? 1 : 0.4,
-        }}
-      >
-        <div className="announce-track">
-          {[0, 1].map((half) => (
-            <div className="announce-half" key={half}>
-              {Array.from({ length: 6 }, (_, i) => (
-                <span className="announce-item" key={i}>
-                  {preview}
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
+      <AnnounceBar
+        settings={form}
+        style={{ borderRadius: 8, opacity: form.announce_enabled ? 1 : 0.4 }}
+      />
 
       <label className="row-check">
         <input
@@ -520,11 +500,11 @@ function AnnouncePanel() {
           />
         </label>
         <label>
-          捲一圈秒數（細＝快）
+          捲字秒數（行一個螢幕要幾耐，大＝慢）
           <input
             type="number"
             min="5"
-            max="200"
+            max="120"
             value={form.announce_speed}
             onChange={(e) => up('announce_speed', e.target.value)}
           />
