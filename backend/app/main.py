@@ -7,7 +7,7 @@ from sqlalchemy import text
 from . import models  # noqa: F401  —— 令 SQLAlchemy 認得所有 model
 from .config import settings
 from .database import Base, engine
-from .routers import admin, auth, favorites, health, orders, products
+from .routers import admin, auth, favorites, health, orders, products, settings as settings_router
 
 # 輕量 migration：現有 SQLite DB 補返新加嘅欄，唔使 reset、保住資料。
 # （Prod Postgres 由 create_all 起齊；呢個只喺 SQLite 行、失敗都唔阻啟動。）
@@ -82,6 +82,7 @@ app.include_router(auth.router)
 app.include_router(products.router)
 app.include_router(favorites.router)
 app.include_router(orders.router)
+app.include_router(settings_router.router)
 app.include_router(admin.router)
 
 

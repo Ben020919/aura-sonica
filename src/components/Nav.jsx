@@ -3,6 +3,7 @@ import { Search, Heart, ShoppingBag, LogOut } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useFavorites } from '../context/FavoritesContext.jsx'
 import { useCart } from '../context/CartContext.jsx'
+import { useCatalog } from '../context/CatalogContext.jsx'
 import Announce from './Announce.jsx'
 
 // 牛仔布資料夾標籤導覽（分頁）：撳頂部標籤 = 去到嗰一頁。
@@ -20,12 +21,16 @@ export default function Nav({ onSearch, onFavorites, onCart, onAuth }) {
   const { count } = useFavorites()
   const { count: cartCount } = useCart()
   const { pathname } = useLocation()
-  // 公告橫幅：只出喺 忘聲海（/）同 商店（/shop）
-  const showAnnounce = pathname === '/' || pathname === '/shop'
+  const { settings } = useCatalog()
+  // 公告橫幅：只出喺 忘聲海（/）同 商店（/shop），而且後台要開咗同埋有文字
+  const showAnnounce =
+    (pathname === '/' || pathname === '/shop') &&
+    !!settings?.announce_enabled &&
+    !!settings?.announce_text?.trim()
 
   return (
     <nav className="denim-nav">
-      {showAnnounce && <Announce />}
+      {showAnnounce && <Announce settings={settings} />}
       <div className="denim-bar">
         <NavLink to="/" className="brand">
           AURA<span style={{ color: '#c7d5ea' }}>_</span>Sonica

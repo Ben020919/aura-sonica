@@ -79,6 +79,21 @@ class Product(Base):
     updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow, nullable=False)
 
 
+class SiteSetting(Base):
+    """網站設定：永遠得一行（id=1）。而家淨係放頂部公告橫幅嘅嘢。"""
+
+    __tablename__ = "site_settings"
+
+    id = Column(Integer, primary_key=True)
+    announce_enabled = Column(Boolean, default=True, nullable=False)
+    announce_text = Column(Text, default="", nullable=False)
+    announce_font_size = Column(Integer, default=12, nullable=False)  # px
+    announce_speed = Column(Integer, default=34, nullable=False)  # 捲一圈幾多秒
+    announce_bg = Column(String(20), default="#e9f1fa", nullable=False)
+    announce_color = Column(String(20), default="#2f4d73", nullable=False)
+    updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow, nullable=False)
+
+
 class Order(Base):
     __tablename__ = "orders"
 

@@ -100,6 +100,27 @@ class ResetRequest(BaseModel):
     password: str = Field(min_length=6)
 
 
+# ── 網站設定（頂部公告橫幅）──────────────────
+class SiteSettingOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    announce_enabled: bool
+    announce_text: str
+    announce_font_size: int
+    announce_speed: int
+    announce_bg: str
+    announce_color: str
+
+
+class SiteSettingUpdate(BaseModel):
+    announce_enabled: bool | None = None
+    announce_text: str | None = None
+    announce_font_size: int | None = Field(default=None, ge=8, le=32)
+    announce_speed: int | None = Field(default=None, ge=5, le=200)
+    announce_bg: str | None = None
+    announce_color: str | None = None
+
+
 # ── 訂單 ────────────────────────────────────
 class OrderItemIn(BaseModel):
     product_slug: str

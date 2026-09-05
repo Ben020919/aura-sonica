@@ -81,12 +81,20 @@ export default function Admin() {
         >
           留言
         </button>
+        <button
+          className={tab === 'announce' ? 'active' : ''}
+          onClick={() => setTab('announce')}
+        >
+          橫幅
+        </button>
       </div>
 
       {tab === 'orders' ? (
         <OrdersPanel />
       ) : tab === 'products' ? (
         <ProductsPanel />
+      ) : tab === 'announce' ? (
+        <AnnouncePanel />
       ) : (
         <NotesPanel />
       )}
@@ -400,6 +408,154 @@ function OrdersPanel() {
         </div>
       )}
     </>
+  )
+}
+
+// 頂部公告橫幅設定：文字 / 字大細 / 速度 / 顏色，改完即刻有預覽
+function AnnouncePanel() {
+  const [form, setForm] = useState(null)
+  const [err, setErr] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    api('/api/admin/settings')
+      .then(setForm)
+      .catch((e) => setErr(e.message))
+  }, [])
+
+  function up(k, v) {
+    setForm((f) => ({ ...f, [k]: v }))
+    setSaved(false)
+  }
+
+  async function save(e) {
+    e.preventDefault()
+    setSaving(true)
+    setErr('')
+    try {
+      const saved = await api('/api/admin/settings', {
+        method: 'PATCH',
+        body: {
+          announce_enabled: form.announce_enabled,
+          announce_text: form.announce_text,
+          announce_font_size: Number(form.announce_font_size),
+          announce_speed: Number(form.announce_speed),
+          announce_bg: form.announce_bg,
+          announce_color: form.announce_color,
+        },
+      })
+      setForm(saved)
+      setSaved(true)
+    } catch (e) {
+      setErr(e.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (!form) return err ? <p className="admin-err">{err}</p> : <p className="muted">載入中…</p>
+
+  const preview = form.announce_text.trim() || '（未有文字）'
+  return (
+    <form className="admin-editor" onSubmit={save}>
+      <h3>頂部公告橫幅</h3>
+      <p className="muted" style={{ fontSize: '0.8rem', margin: 0 }}>
+        出喺「忘聲海」同「商店」兩頁最頂，不停由右向左捲。
+      </p>
+
+      <div
+        className="announce"
+        style={{
+          '--announce-h': `${Math.round(form.announce_font_size * 2.6)}px`,
+          '--announce-font': `${form.announce_font_size}px`,
+          '--announce-speed': `${form.announce_speed}s`,
+          '--announce-bg': form.announce_bg,
+          '--announce-color': form.announce_color,
+          borderRadius: 8,
+          opacity: form.announce_enabled ? 1 : 0.4,
+        }}
+      >
+        <div className="announce-track">
+          {[0, 1].map((half) => (
+            <div className="announce-half" key={half}>
+              {Array.from({ length: 6 }, (_, i) => (
+                <span className="announce-item" key={i}>
+                  {preview}
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <label className="row-check">
+        <input
+          type="checkbox"
+          checked={form.announce_enabled}
+          onChange={(e) => up('announce_enabled', e.target.checked)}
+        />
+        開啟橫幅（熄咗就兩頁都唔會出）
+      </label>
+
+      <label>
+        文字
+        <textarea
+          rows="2"
+          value={form.announce_text}
+          onChange={(e) => up('announce_text', e.target.value)}
+          placeholder="例如：僅適用於網站購買 : 購物滿港幣200元即享免運費"
+        />
+      </label>
+
+      <div className="admin-row">
+        <label>
+          字大細（px）
+          <input
+            type="number"
+            min="8"
+            max="32"
+            value={form.announce_font_size}
+            onChange={(e) => up('announce_font_size', e.target.value)}
+          />
+        </label>
+        <label>
+          捲一圈秒數（細＝快）
+          <input
+            type="number"
+            min="5"
+            max="200"
+            value={form.announce_speed}
+            onChange={(e) => up('announce_speed', e.target.value)}
+          />
+        </label>
+      </div>
+
+      <div className="admin-row">
+        <label>
+          底色
+          <input
+            type="color"
+            value={form.announce_bg}
+            onChange={(e) => up('announce_bg', e.target.value)}
+          />
+        </label>
+        <label>
+          字色
+          <input
+            type="color"
+            value={form.announce_color}
+            onChange={(e) => up('announce_color', e.target.value)}
+          />
+        </label>
+      </div>
+
+      {err && <div className="admin-err">{err}</div>}
+      <button type="submit" className="admin-btn" disabled={saving}>
+        {saving ? '儲存中…' : '儲存'}
+      </button>
+      {saved && <p className="muted" style={{ margin: 0 }}>已儲存 ✅ 前台重新整理就見到</p>}
+    </form>
   )
 }
 

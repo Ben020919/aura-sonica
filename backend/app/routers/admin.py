@@ -21,6 +21,7 @@ from ..notifications import (
     format_status_update,
     send_email,
 )
+from .settings import get_or_create as get_site_settings
 
 # 成個 router 都要管理員權限
 router = APIRouter(
@@ -125,6 +126,24 @@ def delete_order(order_id: int, db: Session = Depends(get_db)):
     db.delete(order)  # order_items 會一齊刪（cascade）
     db.commit()
     return {"ok": True}
+
+
+# ── 網站設定（頂部公告橫幅）──────────────────
+@router.get("/settings", response_model=schemas.SiteSettingOut)
+def read_site_settings(db: Session = Depends(get_db)):
+    return get_site_settings(db)
+
+
+@router.patch("/settings", response_model=schemas.SiteSettingOut)
+def update_site_settings(
+    payload: schemas.SiteSettingUpdate, db: Session = Depends(get_db)
+):
+    row = get_site_settings(db)
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(row, field, value)
+    db.commit()
+    db.refresh(row)
+    return row
 
 
 # ── 商品 ────────────────────────────────────

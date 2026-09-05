@@ -37,17 +37,20 @@ function mapCategory(c) {
 export function CatalogProvider({ children }) {
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
+  const [settings, setSettings] = useState(null) // 網站設定（頂部公告橫幅）
   const [loading, setLoading] = useState(true)
 
   async function load() {
     setLoading(true)
     try {
-      const [ps, cs] = await Promise.all([
+      const [ps, cs, st] = await Promise.all([
         api('/api/products', { auth: false }),
         api('/api/categories', { auth: false }),
+        api('/api/settings', { auth: false }),
       ])
       setProducts(ps.map(mapProduct))
       setCategories(cs.map(mapCategory))
+      setSettings(st)
     } catch {
       /* 後端連唔到就留空，唔會 crash */
     } finally {
@@ -63,12 +66,13 @@ export function CatalogProvider({ children }) {
     () => ({
       products,
       categories,
+      settings,
       loading,
       refresh: load,
       productsByCat: (catId) => products.filter((p) => p.cat === catId),
       findBySlug: (slug) => products.find((p) => p.id === slug),
     }),
-    [products, categories, loading],
+    [products, categories, settings, loading],
   )
   return (
     <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>
