@@ -12,7 +12,7 @@ pydantic-settings==2.14.2
 email-validator==2.3.0
 PyJWT==2.15.1           # JWT 登入 token
 passlib[bcrypt]==1.7.4
-bcrypt==4.0.1
+bcrypt==5.0.0
 python-multipart==0.0.32
 pillow==13.0.0          # 圖片上載壓縮/縮細
 psycopg2-binary==2.9.12 # Postgres（Render 部署用）
