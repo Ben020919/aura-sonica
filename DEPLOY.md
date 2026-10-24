@@ -107,6 +107,30 @@ Render → Aura-Sonica（Static Site）→ **Headers**，Path 全部係 `/*`：
 
 ---
 
+## 資料庫備份（GitHub Actions 每日自動）
+
+Neon 免費計劃只保留 6 個鐘歷史，所以 `.github/workflows/db-backup.yml` 每日香港時間凌晨 3 點自動備份：
+匯出成個資料庫 → 用 `BACKUP_PASSPHRASE` 加密（AES256）→ 存喺 GitHub Actions，保留 30 日。
+
+**需要嘅 GitHub secrets**（repo → Settings → Secrets and variables → Actions）：
+- `DATABASE_URL`：同 Render 後端嗰個一樣（Neon 連線網址）
+- `BACKUP_PASSPHRASE`：加密密碼（20 個字以上）。**一定要另外抄低（例如密碼管理器）**，冇咗佢備份就解唔返。
+
+**手動備份一次**：GitHub → Actions → Database backup → Run workflow
+
+**還原**（要裝 `gh`、`gpg`、Postgres 18 嘅 `pg_restore`）：
+```bash
+gh run list --workflow=db-backup.yml --limit 5          # 揀一個日子嘅 run ID
+gh run download <run ID> -n aura-db-backup
+gpg --decrypt aura-db-YYYYMMDD.dump.gpg > backup.dump   # 會問 BACKUP_PASSPHRASE
+# 建議先還原去一個新嘅 Neon branch 檢查，確認冇問題先用：
+pg_restore --no-owner --no-privileges --clean --if-exists -d "<目標 DATABASE_URL>" backup.dump
+```
+
+⚠️ GitHub 會喺 repo 連續 60 日冇任何更新時自動停用定時 workflow，到時會 email 通知，入 Actions 頁面撳 Enable 就得。
+
+---
+
 ## 上線前 checklist
 - [ ] Postgres 連到、`seed.py` 匯入咗商品
 - [ ] 用 `make_admin.py` 開 Venus 嘅管理員帳戶（強密碼）→ 入到 `/#/admin`

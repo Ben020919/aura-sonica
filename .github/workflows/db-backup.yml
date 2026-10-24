@@ -1,0 +1,51 @@
+# 每日自動備份 Neon 資料庫（Neon 免費計劃只保留 6 個鐘歷史，唔夠）。
+# 備份會用 BACKUP_PASSPHRASE 加密（repo 係公開，一定要加密），保留 30 日。
+# 需要嘅 GitHub secrets：DATABASE_URL、BACKUP_PASSPHRASE。還原方法見 DEPLOY.md。
+name: Database backup
+
+on:
+  schedule:
+    - cron: "0 19 * * *" # 每日香港時間凌晨 3 點
+  workflow_dispatch: # 可以喺 GitHub Actions 頁面手動撳「Run workflow」
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check secrets
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          [ -n "$DATABASE_URL" ] || { echo "::error::未設定 DATABASE_URL secret"; exit 1; }
+          [ ${#BACKUP_PASSPHRASE} -ge 20 ] || { echo "::error::BACKUP_PASSPHRASE 未設定或者少過 20 個字"; exit 1; }
+
+      - name: Dump database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          # 用同 Neon 一樣嘅 Postgres 18 版本 pg_dump（版本太舊會拒絕匯出）
+          docker run --rm -e DATABASE_URL postgres:18 \
+            sh -c 'pg_dump "$DATABASE_URL" --format=custom --no-owner --no-privileges' > backup.dump
+          [ -s backup.dump ] || { echo "::error::匯出結果係空嘅"; exit 1; }
+          echo "Dump size: $(du -h backup.dump | cut -f1)"
+
+      - name: Encrypt
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          echo "$BACKUP_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
+            --symmetric --cipher-algo AES256 --output "aura-db-$(date -u +%Y%m%d).dump.gpg" backup.dump
+          rm backup.dump
+
+      - name: Upload encrypted backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: aura-db-backup
+          path: aura-db-*.dump.gpg
+          retention-days: 30
+          if-no-files-found: error
