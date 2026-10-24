@@ -3,10 +3,13 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 from .config import settings
 
-# Render 畀嘅 URL 係 postgres://…，SQLAlchemy 要 postgresql+psycopg2://
+# Render / Neon 畀嘅 URL 係 postgres://… 或 postgresql://…，一律指明用 psycopg2。
+# （新版 SQLAlchemy 預設 driver 改咗做 psycopg 3，唔指明就會 ModuleNotFoundError）
 db_url = settings.database_url
-if db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
+for prefix in ("postgres://", "postgresql://"):
+    if db_url.startswith(prefix):
+        db_url = db_url.replace(prefix, "postgresql+psycopg2://", 1)
+        break
 
 # SQLite 喺多執行緒（uvicorn）要關 same-thread 檢查
 connect_args = {"check_same_thread": False} if db_url.startswith("sqlite") else {}
