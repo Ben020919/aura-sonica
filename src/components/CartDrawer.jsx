@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { X, Trash2, ShoppingBag, Minus, Plus, ChevronLeft, Download, MessageCircle } from 'lucide-react'
 import { useCart, parseCartKey } from '../context/CartContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
+import VerifyEmailBox from './VerifyEmailBox.jsx'
 import { api } from '../lib/api.js'
 import { downloadReceiptPdf } from '../lib/receipt.js'
 import { useCatalog } from '../context/CatalogContext.jsx'
@@ -256,6 +257,11 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
               </button>
             </div>
 
+            {user && !user.email_verified ? (
+              <div className="drawer-body">
+                <VerifyEmailBox />
+              </div>
+            ) : (
             <form className="drawer-body" onSubmit={submitOrder}>
               <div style={{ display: 'grid', gap: '0.9rem' }}>
                 <label style={{ display: 'grid', gap: 5 }}>
@@ -350,6 +356,7 @@ export default function CartDrawer({ onClose, onRequestLogin }) {
                 。落單後 WhatsApp Venus 安排商品付款（FPS／轉數快）🌊
               </p>
             </form>
+            )}
           </>
         )}
 

@@ -34,6 +34,11 @@ _NEW_COLUMNS = {
         ("address", "TEXT"),
         ("reset_attempts", "INTEGER"),
         ("token_version", "INTEGER DEFAULT 0"),
+        # 唔設 DEFAULT：現有帳戶會係 NULL，下面統一當「已驗證」
+        ("email_verified", "BOOLEAN"),
+        ("verify_code", "VARCHAR(6)"),
+        ("verify_expires", "DATETIME"),
+        ("verify_attempts", "INTEGER"),
     ],
 }
 
@@ -66,6 +71,8 @@ def _auto_migrate() -> None:
                 text("UPDATE site_settings SET free_shipping_min = 200 WHERE free_shipping_min IS NULL")
             )
             conn.execute(text("UPDATE users SET token_version = 0 WHERE token_version IS NULL"))
+            # 加 email 驗證之前已經註冊嘅帳戶：當已驗證，唔影響舊客人
+            conn.execute(text("UPDATE users SET email_verified = TRUE WHERE email_verified IS NULL"))
     except Exception as e:  # noqa: BLE001
         print(f"[migrate] 略過 auto-migrate：{e}")
 

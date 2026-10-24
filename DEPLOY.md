@@ -92,6 +92,21 @@ Venus 個 Gmail 開一個 **App Password（應用程式密碼）**，喺後端�
 
 ---
 
+## 前端安全 Header（喺 Render 網站設定，唔喺 code 入面）
+
+Render → Aura-Sonica（Static Site）→ **Headers**，Path 全部係 `/*`：
+
+| Header | Value |
+|---|---|
+| `Content-Security-Policy` | `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://aura-sonica-api.onrender.com; connect-src 'self' https://aura-sonica-api.onrender.com https://fonts.googleapis.com https://fonts.gstatic.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'` |
+| `X-Frame-Options` | `DENY` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+
+⚠️ 如果日後加新嘅外部資源（例如新字體、新圖片網站、第三方 script），要將佢個網址加入上面 CSP 對應嘅位置，否則會被瀏覽器擋。
+改之前可以先將 Header 名改成 `Content-Security-Policy-Report-Only` 試，確認冇問題再改返。
+
+---
+
 ## 上線前 checklist
 - [ ] Postgres 連到、`seed.py` 匯入咗商品
 - [ ] 用 `make_admin.py` 開 Venus 嘅管理員帳戶（強密碼）→ 入到 `/#/admin`

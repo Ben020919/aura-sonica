@@ -7,16 +7,28 @@ from sqlalchemy.orm import Session
 from .. import models, schemas
 from ..database import get_db
 from ..deps import get_current_user
-from ..notifications import format_password_reset, send_email
+from ..notifications import format_email_verification, format_password_reset, send_email
 from ..ratelimit import limit, limit_key
 from ..security import create_access_token, hash_password, verify_password
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 MAX_RESET_ATTEMPTS = 5  # 驗證碼錯 5 次即作廢，要重新申請
+MAX_VERIFY_ATTEMPTS = 5
+VERIFY_CODE_MINUTES = 30
 
 # 用嚟令「email 唔存在」都行一次 bcrypt，等回應時間一樣，唔會被人用時間差估到邊個 email 有註冊
 _DUMMY_HASH = hash_password("dummy-password-for-timing")
+
+
+def _send_verification(user: models.User, background: BackgroundTasks) -> None:
+    """產生新嘅 email 驗證碼並寄出（舊碼即時作廢）。呼叫者負責 commit。"""
+    code = f"{secrets.randbelow(1000000):06d}"
+    user.verify_code = code
+    user.verify_expires = datetime.now(timezone.utc) + timedelta(minutes=VERIFY_CODE_MINUTES)
+    user.verify_attempts = 0
+    subject, text, html = format_email_verification(user, code)
+    background.add_task(send_email, user.email, subject, text, html)
 
 
 def _bump_token_version(user: models.User) -> None:
@@ -35,7 +47,10 @@ def _token_response(user: models.User) -> schemas.Token:
 
 @router.post("/register", response_model=schemas.Token)
 def register(
-    payload: schemas.UserCreate, request: Request, db: Session = Depends(get_db)
+    payload: schemas.UserCreate,
+    request: Request,
+    background: BackgroundTasks,
+    db: Session = Depends(get_db),
 ):
     limit(request, "register", max_hits=5, window=3600)  # 每個 IP 每小時最多開 5 個帳戶
     email = payload.email.strip().lower()
@@ -48,8 +63,10 @@ def register(
         password_hash=hash_password(payload.password),
         name=(payload.name or email.split("@")[0]).strip(),
         is_admin=False,
+        email_verified=False,
     )
     db.add(user)
+    _send_verification(user, background)
     db.commit()
     db.refresh(user)
     return _token_response(user)
@@ -93,6 +110,55 @@ def update_me(
     db.commit()
     db.refresh(user)
     return user
+
+
+@router.post("/verify-email", response_model=schemas.UserOut)
+def verify_email(
+    payload: schemas.VerifyEmailRequest,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """輸入註冊時收到嘅 6 位驗證碼。"""
+    if user.email_verified:
+        return user
+    limit_key(f"verify:{user.id}", max_hits=10, window=900)
+    if not user.verify_code:
+        raise HTTPException(status_code=400, detail="驗證碼已失效，請按「重寄驗證碼」")
+    exp = user.verify_expires
+    if exp is not None and exp.tzinfo is None:
+        exp = exp.replace(tzinfo=timezone.utc)
+    if exp is not None and datetime.now(timezone.utc) > exp:
+        raise HTTPException(status_code=400, detail="驗證碼已過期，請按「重寄驗證碼」")
+    if not secrets.compare_digest(user.verify_code, payload.code.strip()):
+        user.verify_attempts = (user.verify_attempts or 0) + 1
+        if user.verify_attempts >= MAX_VERIFY_ATTEMPTS:
+            user.verify_code = None
+            user.verify_expires = None
+            db.commit()
+            raise HTTPException(status_code=400, detail="錯得太多次，驗證碼已作廢，請按「重寄驗證碼」")
+        db.commit()
+        raise HTTPException(status_code=400, detail="驗證碼唔啱")
+    user.email_verified = True
+    user.verify_code = None
+    user.verify_expires = None
+    user.verify_attempts = 0
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.post("/resend-verification")
+def resend_verification(
+    background: BackgroundTasks,
+    user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if user.email_verified:
+        return {"ok": True, "message": "你嘅 email 已經驗證咗"}
+    limit_key(f"resend-verify:{user.id}", max_hits=3, window=3600)
+    _send_verification(user, background)
+    db.commit()
+    return {"ok": True, "message": f"驗證碼已重新寄去 {user.email}"}
 
 
 @router.post("/change-password")
@@ -174,6 +240,7 @@ def reset_password(
     user.reset_code = None
     user.reset_expires = None
     user.reset_attempts = 0
+    user.email_verified = True  # 收到重設碼 = 證明 email 係佢嘅
     _bump_token_version(user)  # 踢走所有舊登入（例如偷咗帳戶嘅人）
     db.commit()
     db.refresh(user)

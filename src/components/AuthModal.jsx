@@ -2,13 +2,15 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
+import VerifyEmailBox from './VerifyEmailBox.jsx'
 
-// mode: login | register | forgot | reset
+// mode: login | register | verify | forgot | reset
 const TITLES = {
   login: ['歡迎回來', '回到屬於你的那片海'],
   register: ['加入忘聲海', '留一個名字，讓 Aura 認得你'],
   forgot: ['忘記密碼', '輸入你的 email，我哋會寄重設驗證碼畀你'],
   reset: ['重設密碼', '輸入收到的驗證碼同新密碼'],
+  verify: ['驗證 Email', '最後一步，確認呢個 email 係你嘅'],
 }
 
 export default function AuthModal({ onClose }) {
@@ -43,6 +45,8 @@ export default function AuthModal({ onClose }) {
       if (mode === 'forgot') {
         setInfo(res.message || '驗證碼已寄出，請查收 email。')
         setMode('reset')
+      } else if (mode === 'register') {
+        setMode('verify') // 已登入，但要驗證 email 先可以落單
       } else {
         onClose() // login / register / reset 成功 = 已登入
       }
@@ -53,6 +57,24 @@ export default function AuthModal({ onClose }) {
 
   const [title, sub] = TITLES[mode]
   const btnLabel = { login: '登入', register: '註冊', forgot: '寄重設碼', reset: '重設密碼' }[mode]
+
+  if (mode === 'verify') {
+    return (
+      <div className="overlay" onClick={onClose}>
+        <motion.div className="modal glass" onClick={(e) => e.stopPropagation()}>
+          <button className="close" onClick={onClose} aria-label="關閉">
+            <X size={18} />
+          </button>
+          <h3>{title}</h3>
+          <p className="sub">{sub}</p>
+          <VerifyEmailBox onVerified={onClose} />
+          <div className="switch">
+            <button onClick={onClose}>稍後先驗證</button>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
 
   return (
     <div className="overlay" onClick={onClose}>

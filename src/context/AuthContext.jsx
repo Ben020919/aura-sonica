@@ -78,6 +78,26 @@ export function AuthProvider({ children }) {
     }
   }
 
+  // Email 驗證：註冊後收到 6 位碼，驗證咗先可以落單
+  async function verifyEmail(code) {
+    try {
+      const u = await api('/api/auth/verify-email', { method: 'POST', body: { code } })
+      setUser(u)
+      return { ok: true }
+    } catch (e) {
+      return { ok: false, error: e.status ? e.message : '連唔到伺服器，請稍後再試' }
+    }
+  }
+
+  async function resendVerification() {
+    try {
+      const data = await api('/api/auth/resend-verification', { method: 'POST' })
+      return { ok: true, message: data.message }
+    } catch (e) {
+      return { ok: false, error: e.status ? e.message : '連唔到伺服器，請稍後再試' }
+    }
+  }
+
   // 個人資料（地址簿）：姓名 / 電話 / 收貨地址
   async function updateProfile({ name, phone, address }) {
     try {
@@ -119,6 +139,8 @@ export function AuthProvider({ children }) {
       resetPassword,
       updateProfile,
       changePassword,
+      verifyEmail,
+      resendVerification,
     }),
     [user, ready],
   )

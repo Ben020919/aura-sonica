@@ -398,6 +398,31 @@ def format_password_reset(user, code: str) -> tuple[str, str, str]:
     return subject, "\n".join(tlines), _email_html(inner)
 
 
+def format_email_verification(user, code: str) -> tuple[str, str, str]:
+    """註冊 → 寄 email 驗證碼。"""
+    hello = f"{user.name} 你好，" if user.name else "你好，"
+    subject = "【AURA_Sonica】Email 驗證碼"
+    tlines = [
+        hello,
+        "",
+        "歡迎加入忘聲海！你嘅 email 驗證碼係：",
+        "",
+        f"        {code}",
+        "",
+        "30 分鐘內有效。驗證之後就可以落單。如果唔係你註冊，可以直接忽略呢封 email。",
+        "",
+        "— AURA_Sonica",
+    ]
+    inner = f"""\
+<p style="margin:0 0 18px;">{esc(hello)}</p>
+<p style="margin:0 0 26px;">歡迎加入忘聲海！請用以下驗證碼確認你嘅 email：</p>
+<div style="text-align:center;margin:0 0 24px;">
+  <span style="display:inline-block;background:#eef5f6;border:1px solid #d6e6e9;border-radius:12px;padding:16px 30px;font-size:34px;letter-spacing:12px;font-weight:700;color:#1f4a54;font-family:'SF Mono',Menlo,Consolas,monospace;">{esc(code)}</span>
+</div>
+<p style="margin:0;text-align:center;color:#9fb2b6;font-size:13px;line-height:1.7;">30 分鐘內有效 · 唔係你註冊可以忽略呢封 email</p>"""
+    return subject, "\n".join(tlines), _email_html(inner)
+
+
 def format_note(alias: str, message: str) -> tuple[str, str, str]:
     """首頁留言 → 通知 Venus。"""
     subject = f"🐚 AURA_Sonica 留言 — 來自 {alias}"

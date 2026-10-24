@@ -70,6 +70,7 @@ class UserOut(BaseModel):
     phone: str | None = None
     address: str | None = None
     is_admin: bool
+    email_verified: bool = False
 
 
 class ProfileUpdate(BaseModel):
@@ -92,6 +93,10 @@ class Token(BaseModel):
 
 class ForgotRequest(BaseModel):
     email: EmailStr
+
+
+class VerifyEmailRequest(BaseModel):
+    code: str = Field(max_length=10)
 
 
 class ResetRequest(BaseModel):

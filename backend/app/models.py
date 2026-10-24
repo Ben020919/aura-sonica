@@ -41,6 +41,12 @@ class User(Base):
     # 改密碼 / 重設密碼時 +1，令所有舊 token 即時失效
     token_version = Column(Integer, default=0, nullable=False)
 
+    # Email 驗證：註冊後寄 6 位碼，驗證咗先可以落單
+    email_verified = Column(Boolean, default=False, nullable=False)
+    verify_code = Column(String(6))
+    verify_expires = Column(DateTime)
+    verify_attempts = Column(Integer, default=0)
+
     orders = relationship("Order", back_populates="user")
     favorites = relationship(
         "Favorite", back_populates="user", cascade="all, delete-orphan"

@@ -24,6 +24,7 @@ def run(email: str, password: str) -> None:
         user = db.query(models.User).filter(models.User.email == email).first()
         if user:
             user.is_admin = True
+            user.email_verified = True
             user.password_hash = hash_password(password)
             action = "升級咗現有帳戶做管理員（並更新密碼）"
         else:
@@ -32,6 +33,7 @@ def run(email: str, password: str) -> None:
                 password_hash=hash_password(password),
                 name=email.split("@")[0],
                 is_admin=True,
+                email_verified=True,
             )
             db.add(user)
             action = "建立咗新管理員帳戶"

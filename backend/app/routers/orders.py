@@ -45,6 +45,8 @@ def create_order(
     user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    if not user.email_verified:
+        raise HTTPException(status_code=403, detail="請先驗證你嘅 email，先可以落單")
     limit_key(f"order:{user.id}", max_hits=10, window=3600)
     open_unpaid = (
         db.query(models.Order)
