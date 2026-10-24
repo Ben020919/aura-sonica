@@ -40,6 +40,11 @@ class Settings(BaseSettings):
     public_base_url: str = ""
 
     @property
+    def is_production(self) -> bool:
+        """用 SQLite ＝ 本機開發；其他（Render Postgres）＝ 正式環境。"""
+        return not self.database_url.startswith("sqlite")
+
+    @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
@@ -49,3 +54,19 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# ── 安全檢查：JWT_SECRET 太弱就唔准喺正式環境啟動 ──
+# 呢串一漏，任何人都可以自己簽 admin token。
+_weak_secret = (
+    len(settings.jwt_secret) < 32
+    or "change" in settings.jwt_secret.lower()
+    or "secret" in settings.jwt_secret.lower()
+)
+if _weak_secret:
+    _msg = (
+        "JWT_SECRET 太弱或者仲係預設值！請用以下指令生成一串，再放入環境變數：\n"
+        "  python -c \"import secrets; print(secrets.token_urlsafe(48))\""
+    )
+    if settings.is_production:
+        raise RuntimeError(_msg)
+    print(f"[警告] {_msg}")

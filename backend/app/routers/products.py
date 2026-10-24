@@ -1,10 +1,11 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
 from ..config import settings
 from ..database import get_db
 from ..notifications import format_note, send_email
+from ..ratelimit import limit, limit_key
 
 router = APIRouter(prefix="/api", tags=["products"])
 
@@ -13,9 +14,13 @@ router = APIRouter(prefix="/api", tags=["products"])
 def leave_note(
     payload: schemas.NoteIn,
     background: BackgroundTasks,
+    request: Request,
     db: Session = Depends(get_db),
 ):
     """首頁「留言」→ 存入 DB + email 去 Venus。"""
+    # 唔使登入都用到，所以要限次數，防止有人洗爆 Venus 個信箱
+    limit(request, "note", max_hits=3, window=600)
+    limit_key("note:global", max_hits=60, window=3600)
     message = payload.message.strip()
     nickname = (payload.nickname or "").strip() or None
     db.add(models.Note(nickname=nickname, message=message))

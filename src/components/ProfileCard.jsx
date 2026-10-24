@@ -60,7 +60,7 @@ export default function ProfileCard() {
     e.preventDefault()
     if (pwBusy) return
     setPwMsg('')
-    if (pw.new_password.length < 6) return setPwMsg('新密碼最少 6 個字')
+    if (pw.new_password.length < 8) return setPwMsg('新密碼最少 8 個字')
     if (pw.new_password !== pw.confirm) return setPwMsg('兩次輸入嘅新密碼唔一樣')
     setPwBusy(true)
     const r = await changePassword({ current_password: pw.current_password, new_password: pw.new_password })
@@ -130,7 +130,7 @@ export default function ProfileCard() {
             <input style={inputStyle} type="password" value={pw.current_password} onChange={setP('current_password')} autoComplete="current-password" />
           </label>
           <label>
-            <span style={labelStyle}>新密碼（最少 6 個字）</span>
+            <span style={labelStyle}>新密碼（最少 8 個字）</span>
             <input style={inputStyle} type="password" value={pw.new_password} onChange={setP('new_password')} autoComplete="new-password" />
           </label>
           <label>

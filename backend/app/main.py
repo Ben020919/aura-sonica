@@ -32,6 +32,8 @@ _NEW_COLUMNS = {
         ("reset_expires", "DATETIME"),
         ("phone", "VARCHAR(40)"),   # 個人資料（地址簿）
         ("address", "TEXT"),
+        ("reset_attempts", "INTEGER"),
+        ("token_version", "INTEGER DEFAULT 0"),
     ],
 }
 
@@ -63,6 +65,7 @@ def _auto_migrate() -> None:
             conn.execute(
                 text("UPDATE site_settings SET free_shipping_min = 200 WHERE free_shipping_min IS NULL")
             )
+            conn.execute(text("UPDATE users SET token_version = 0 WHERE token_version IS NULL"))
     except Exception as e:  # noqa: BLE001
         print(f"[migrate] 略過 auto-migrate：{e}")
 
@@ -74,15 +77,37 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="AURA_Sonica API", version="0.2.0", lifespan=lifespan)
+# 正式環境唔公開 API 說明頁（/docs、/redoc、/openapi.json）
+_docs = not settings.is_production
+app = FastAPI(
+    title="AURA_Sonica API",
+    version="0.2.0",
+    lifespan=lifespan,
+    docs_url="/docs" if _docs else None,
+    redoc_url="/redoc" if _docs else None,
+    openapi_url="/openapi.json" if _docs else None,
+)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
 )
+
+
+@app.middleware("http")
+async def security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    if settings.is_production:
+        response.headers.setdefault(
+            "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
+        )
+    return response
 
 app.include_router(health.router)
 app.include_router(auth.router)
@@ -95,4 +120,4 @@ app.include_router(admin.router)
 
 @app.get("/")
 def root():
-    return {"name": "AURA_Sonica API", "docs": "/docs"}
+    return {"name": "AURA_Sonica API"}

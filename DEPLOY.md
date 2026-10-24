@@ -31,7 +31,11 @@ npm run dev        # → http://localhost:5178
 - 前台：http://localhost:5178
 - **後台**：http://localhost:5178/#/admin
 
-**點入後台？** 用管理員帳戶登入。凡係 `backend/.env` 入面 `ADMIN_EMAILS` 列咗嘅 email（預設 = Venus 個 Gmail），一註冊就自動變管理員。所以 Venus 用佢 Gmail 喺網站註冊一次，就入到後台。
+**點入後台？** 用管理員帳戶登入。為咗安全，公開註冊**永遠唔會**變管理員；管理員帳戶只可以由開發者喺 `backend/` 入面執行：
+
+```bash
+./venv/bin/python make_admin.py <email> <強密碼>
+```
 
 ---
 
@@ -54,7 +58,7 @@ Render → **New → Web Service**，連你個 GitHub repo `aura-sonica`：
 | Key | Value |
 |---|---|
 | `DATABASE_URL` | 上面 Postgres 個 Internal URL |
-| `JWT_SECRET` | 一串長亂碼（自己撳鍵盤打）|
+| `JWT_SECRET` | 用 `python -c "import secrets; print(secrets.token_urlsafe(48))"` 生成（太短或預設值，伺服器會拒絕啟動）|
 | `ADMIN_EMAILS` | `VENUSLEUNG412@GMAIL.COM` |
 | `CORS_ORIGINS` | 前端網址，例如 `https://aura-sonica.onrender.com` |
 
@@ -90,9 +94,10 @@ Venus 個 Gmail 開一個 **App Password（應用程式密碼）**，喺後端�
 
 ## 上線前 checklist
 - [ ] Postgres 連到、`seed.py` 匯入咗商品
-- [ ] Venus 用佢 Gmail 註冊一次（自動變管理員）→ 入到 `/#/admin`
+- [ ] 用 `make_admin.py` 開 Venus 嘅管理員帳戶（強密碼）→ 入到 `/#/admin`
 - [ ] 落一張測試單 → Venus 收到通知 email
-- [ ] `JWT_SECRET` 唔係預設值（安全）
+- [ ] `JWT_SECRET` 係隨機生成嘅長字串（唔係預設值會拒絕啟動）
+- [ ] 正式環境 `/docs` 應該開唔到（404）
 - [ ] 前端 `VITE_API_URL` 指啱後端、重新部署過
 - [ ] （日後）Phase 4：接 Stripe 線上付款
 

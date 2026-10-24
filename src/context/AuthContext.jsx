@@ -95,6 +95,8 @@ export function AuthProvider({ children }) {
         method: 'POST',
         body: { current_password, new_password },
       })
+      // 改密碼後舊 token 會失效，換上後端回嘅新 token（其他裝置會被登出）
+      if (data.access_token) setToken(data.access_token)
       return { ok: true, message: data.message }
     } catch (e) {
       return { ok: false, error: e.status ? e.message : '連唔到伺服器，請稍後再試' }

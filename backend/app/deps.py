@@ -25,12 +25,15 @@ def get_current_user(
     payload = decode_token(token)
     if not payload or "sub" not in payload:
         raise _CRED_ERR
-    user = (
-        db.query(models.User)
-        .filter(models.User.id == int(payload["sub"]))
-        .first()
-    )
+    try:
+        user_id = int(payload["sub"])
+    except (TypeError, ValueError):
+        raise _CRED_ERR
+    user = db.query(models.User).filter(models.User.id == user_id).first()
     if user is None:
+        raise _CRED_ERR
+    # 改過密碼之後，舊 token 嘅 ver 對唔上 → 即時失效
+    if payload.get("ver", 0) != (user.token_version or 0):
         raise _CRED_ERR
     return user
 

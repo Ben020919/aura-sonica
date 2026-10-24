@@ -37,6 +37,9 @@ class User(Base):
     # 忘記密碼：重設驗證碼 + 到期時間
     reset_code = Column(String(6))
     reset_expires = Column(DateTime)
+    reset_attempts = Column(Integer, default=0)  # 驗證碼試錯次數，夠 5 次即作廢
+    # 改密碼 / 重設密碼時 +1，令所有舊 token 即時失效
+    token_version = Column(Integer, default=0, nullable=False)
 
     orders = relationship("Order", back_populates="user")
     favorites = relationship(

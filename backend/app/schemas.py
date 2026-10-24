@@ -16,8 +16,8 @@ class CategoryOut(BaseModel):
 
 
 class NoteIn(BaseModel):
-    nickname: str | None = None
-    message: str = Field(min_length=1)
+    nickname: str | None = Field(default=None, max_length=40)
+    message: str = Field(min_length=1, max_length=2000)
 
 
 class NoteOut(BaseModel):
@@ -51,14 +51,14 @@ class ProductOut(BaseModel):
 
 # ── 認證 ────────────────────────────────────
 class UserCreate(BaseModel):
-    name: str | None = None
+    name: str | None = Field(default=None, max_length=120)
     email: EmailStr
-    password: str = Field(min_length=6)
+    password: str = Field(min_length=8, max_length=128)
 
 
 class UserLogin(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(max_length=128)
 
 
 class UserOut(BaseModel):
@@ -74,14 +74,14 @@ class UserOut(BaseModel):
 
 class ProfileUpdate(BaseModel):
     """個人資料（地址簿）"""
-    name: str | None = None
-    phone: str | None = None
-    address: str | None = None
+    name: str | None = Field(default=None, max_length=120)
+    phone: str | None = Field(default=None, max_length=40)
+    address: str | None = Field(default=None, max_length=500)
 
 
 class PasswordChange(BaseModel):
-    current_password: str
-    new_password: str = Field(min_length=6)
+    current_password: str = Field(max_length=128)
+    new_password: str = Field(min_length=8, max_length=128)
 
 
 class Token(BaseModel):
@@ -96,8 +96,8 @@ class ForgotRequest(BaseModel):
 
 class ResetRequest(BaseModel):
     email: EmailStr
-    code: str
-    password: str = Field(min_length=6)
+    code: str = Field(max_length=10)
+    password: str = Field(min_length=8, max_length=128)
 
 
 # ── 網站設定（頂部公告橫幅）──────────────────
@@ -125,19 +125,19 @@ class SiteSettingUpdate(BaseModel):
 
 # ── 訂單 ────────────────────────────────────
 class OrderItemIn(BaseModel):
-    product_slug: str
+    product_slug: str = Field(max_length=120)
     quantity: int = Field(ge=1, le=99)
-    variant: str | None = None  # 顏色等選項（例：Blue）
-    size: str | None = None  # 尺碼（例：M）
+    variant: str | None = Field(default=None, max_length=60)  # 顏色等選項（例：Blue）
+    size: str | None = Field(default=None, max_length=30)  # 尺碼（例：M）
 
 
 class OrderCreate(BaseModel):
-    items: list[OrderItemIn] = Field(min_length=1)
-    contact_name: str = Field(min_length=1)
-    contact_phone: str = Field(min_length=1)
+    items: list[OrderItemIn] = Field(min_length=1, max_length=30)
+    contact_name: str = Field(min_length=1, max_length=120)
+    contact_phone: str = Field(min_length=1, max_length=40)
     contact_email: EmailStr | None = None
-    shipping_address: str = Field(min_length=1)
-    note: str | None = None
+    shipping_address: str = Field(min_length=1, max_length=500)
+    note: str | None = Field(default=None, max_length=1000)
 
 
 class OrderItemOut(BaseModel):
@@ -177,7 +177,7 @@ class OrderOut(BaseModel):
 
 
 class ReturnCreate(BaseModel):
-    reason: str = Field(min_length=1)
+    reason: str = Field(min_length=1, max_length=1000)
 
 
 # ── 後台（管理員）──────────────────────────

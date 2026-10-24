@@ -9,6 +9,7 @@ from .. import models, schemas
 from ..config import settings
 from ..database import get_db
 from ..deps import get_current_user
+from ..ratelimit import limit_key
 from .settings import get_or_create as get_site_settings
 from ..notifications import (
     format_customer_confirmation,
@@ -19,6 +20,9 @@ from ..notifications import (
 )
 
 router = APIRouter(prefix="/api/orders", tags=["orders"])
+
+# 每個帳戶最多同時有幾多張「未付款」訂單（防止有人落假單霸晒庫存）
+MAX_OPEN_UNPAID_ORDERS = 3
 
 # 套裝價（要同前端 src/lib/pricing.js 一致）；而家冇，日後有就加返
 BUNDLE_PRICES = {}
@@ -41,6 +45,22 @@ def create_order(
     user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    limit_key(f"order:{user.id}", max_hits=10, window=3600)
+    open_unpaid = (
+        db.query(models.Order)
+        .filter(
+            models.Order.user_id == user.id,
+            models.Order.status == "new",
+            models.Order.payment_status == "unpaid",
+        )
+        .count()
+    )
+    if open_unpaid >= MAX_OPEN_UNPAID_ORDERS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"你已經有 {open_unpaid} 張未付款訂單，請先完成付款或取消舊單，再落新單",
+        )
+
     # 訂單編號 = 香港日期 + 當日序號，例如 2026070901
     date_str = datetime.now(HKT).strftime("%Y%m%d")
     seq_today = (
@@ -122,10 +142,9 @@ def create_order(
     subject, text, html = format_order_email(order)
     background.add_task(send_email, settings.notify_email, subject, text, html)
 
-    # 客人確認信（有留 email 先寄）
-    if order.contact_email:
-        c_subject, c_text, c_html = format_customer_confirmation(order)
-        background.add_task(send_email, order.contact_email, c_subject, c_text, c_html)
+    # 客人確認信：只寄去帳戶本身嘅 email（唔寄去表格填嘅任意地址，防止被人用嚟寄垃圾信畀第三者）
+    c_subject, c_text, c_html = format_customer_confirmation(order)
+    background.add_task(send_email, user.email, c_subject, c_text, c_html)
 
     return order
 
@@ -163,6 +182,7 @@ def request_return(
     db: Session = Depends(get_db),
 ):
     """客人申請退貨。"""
+    limit_key(f"return:{user.id}", max_hits=10, window=3600)
     order = (
         db.query(models.Order)
         .filter(models.Order.id == order_id, models.Order.user_id == user.id)
@@ -182,9 +202,8 @@ def request_return(
     # 通知 Venus + 覆客人
     s, st, sh = format_return_received_admin(order)
     background.add_task(send_email, settings.notify_email, s, st, sh)
-    if order.contact_email:
-        cs, ct, ch = format_return_customer(order)
-        background.add_task(send_email, order.contact_email, cs, ct, ch)
+    cs, ct, ch = format_return_customer(order)
+    background.add_task(send_email, user.email, cs, ct, ch)
     return order
 
 
@@ -196,6 +215,7 @@ def cancel_order(
     db: Session = Depends(get_db),
 ):
     """客人自行取消訂單（只限未處理／未出貨嘅新訂單）。"""
+    limit_key(f"cancel:{user.id}", max_hits=20, window=3600)
     order = (
         db.query(models.Order)
         .filter(models.Order.id == order_id, models.Order.user_id == user.id)

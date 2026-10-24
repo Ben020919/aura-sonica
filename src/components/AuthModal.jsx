@@ -111,10 +111,10 @@ export default function AuthModal({ onClose }) {
               <input
                 type="password"
                 required
-                minLength={6}
+                minLength={mode === 'login' ? undefined : 8}
                 value={form.password}
                 onChange={(e) => update('password', e.target.value)}
-                placeholder="至少 6 個字"
+                placeholder={mode === 'login' ? '' : '至少 8 個字'}
               />
             </div>
           )}
