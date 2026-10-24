@@ -1,0 +1,25 @@
+# Dependabot：每月檢查套件有冇新版，有就自動開 Pull Request。
+# 有安全漏洞會另外即時開 PR + email 通知（唔使等每月）。
+# 收到 PR：測試冇問題就 Merge，Render 會自動部署。
+version: 2
+updates:
+  # 後端（Python）
+  - package-ecosystem: pip
+    directory: /backend
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    groups:
+      # 小版本 / 修正版合成一個 PR，唔會一次過開十幾個
+      backend-minor:
+        update-types: [minor, patch]
+
+  # 前端（npm）
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    groups:
+      frontend-minor:
+        update-types: [minor, patch]
