@@ -18,11 +18,12 @@ _MAX_KEYS = 50_000  # 防止 key 太多食爆記憶體
 
 
 def client_ip(request: Request) -> str:
-    """Render 喺前面有 proxy，真 IP 喺 X-Forwarded-For。
-    攞「最右邊」嗰個：嗰個係 Render 自己加嘅，客人偽造唔到（佢只可以喺左邊加嘢）。"""
-    fwd = request.headers.get("x-forwarded-for")
-    if fwd:
-        return fwd.split(",")[-1].strip()
+    """Render 前面係 Cloudflare：客人真 IP 喺 CF-Connecting-IP（由 Cloudflare 設定，
+    客人偽造會被 Cloudflare 拒絕）。X-Forwarded-For 最右邊係 Cloudflare 伺服器 IP，
+    好多客人共用，唔用得。本機開發冇呢個 header，就用直接連線 IP。"""
+    cf_ip = request.headers.get("cf-connecting-ip")
+    if cf_ip:
+        return cf_ip.strip()
     return request.client.host if request.client else "unknown"
 
 
