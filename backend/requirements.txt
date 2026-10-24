@@ -14,7 +14,7 @@ python-jose[cryptography]==3.5.0
 passlib[bcrypt]==1.7.4
 bcrypt==4.0.1
 python-multipart==0.0.32
-pillow==12.3.0          # 圖片上載壓縮/縮細
+pillow==13.0.0          # 圖片上載壓縮/縮細
 psycopg2-binary==2.9.12 # Postgres（Render 部署用）
 
 # ── 間接依賴（由上面套件帶入，一樣鎖死）──
