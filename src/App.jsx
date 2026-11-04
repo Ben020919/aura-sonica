@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import Background from './components/Background.jsx'
@@ -18,6 +18,7 @@ import Character from './sections/Character.jsx'
 import Story from './sections/Story.jsx'
 import Gallery from './sections/Gallery.jsx'
 import Shop from './sections/Shop.jsx'
+import { trackPageView } from './lib/api.js'
 
 // 換頁淡入轉場
 function Page({ children }) {
@@ -37,6 +38,18 @@ function ScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => {
     window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
+
+// 每換一頁記一次瀏覽（後台「流量」睇）。後台自己唔計。
+function TrackPageView() {
+  const { pathname } = useLocation()
+  const last = useRef(null)
+  useEffect(() => {
+    if (pathname === '/admin' || last.current === pathname) return // StrictMode 會行兩次
+    last.current = pathname
+    trackPageView(pathname)
   }, [pathname])
   return null
 }
@@ -76,6 +89,7 @@ export default function App() {
     <>
       {!bare && <Background />}
       <ScrollToTop />
+      <TrackPageView />
       {!bare && (
         <Nav
           onAuth={() => setAuthOpen(true)}

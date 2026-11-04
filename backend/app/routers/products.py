@@ -31,6 +31,20 @@ def leave_note(
     return {"ok": True}
 
 
+@router.post("/track", status_code=204)
+def track_view(payload: schemas.PageViewIn, request: Request, db: Session = Depends(get_db)):
+    """公開：前台每換一頁打一次，記低瀏覽紀錄（後台「流量」用）。"""
+    # 唔使登入，所以都要限次數，防止有人狂打塞爆 DB
+    limit(request, "track", max_hits=60, window=60)
+    limit_key("track:global", max_hits=20_000, window=3600)
+    path = payload.path.split("?")[0].strip()
+    if not path.startswith("/") or path.startswith("/admin"):
+        return Response(status_code=204)
+    db.add(models.PageView(path=path, visitor=payload.visitor.strip()))
+    db.commit()
+    return Response(status_code=204)
+
+
 @router.get("/images/{image_id}")
 def get_image(image_id: int, db: Session = Depends(get_db)):
     """公開：serve 後台上載嘅圖片（畀商店 <img> 用）。"""

@@ -35,7 +35,7 @@
 .admin-top h1 { font-size: 1.4rem; color: #2f4d73; }
 .admin-top span { color: #5b6b85; margin-right: 12px; font-size: 0.9rem; }
 
-.admin-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.admin-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 .admin-tabs button {
   padding: 8px 18px;
   border: none;
@@ -44,6 +44,7 @@
   color: #3a4a63;
   cursor: pointer;
   font-size: 0.95rem;
+  white-space: nowrap;
 }
 .admin-tabs button.active { background: #5b7fb0; color: #fff; }
 
@@ -190,3 +191,66 @@ textarea.admin-input,
 /* 取消咗嘅訂單：淡化保留（留紀錄，唔刪走） */
 .admin-table tr.row-cancelled td { opacity: 0.5; }
 .admin-table tr.row-cancelled td:first-child { text-decoration: line-through; }
+
+/* 流量：數字卡 + 每日瀏覽棒形圖 */
+.stats-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.stats-tile {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px 18px;
+  font-size: 0.85rem;
+}
+.stats-tile-name { color: #5b6b85; margin-bottom: 4px; }
+.stats-tile-num { font-size: 2rem; font-weight: 600; color: #2f4d73; line-height: 1.2; }
+.stats-chart-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px 18px 12px;
+  margin-bottom: 14px;
+}
+.stats-chart-head {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.88rem;
+  margin-bottom: 12px;
+}
+.stats-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 180px;
+  border-bottom: 1px solid #dce6f2;
+}
+.stats-col {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  cursor: pointer;
+}
+.stats-bar {
+  width: 100%;
+  min-height: 2px;
+  background: #5b7fb0;
+  border-radius: 4px 4px 0 0;
+}
+.stats-col.hover .stats-bar { background: #2f4d73; }
+.stats-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #8595ac;
+  margin-top: 6px;
+}
+
+@media (max-width: 600px) {
+  .admin-bar { flex-wrap: wrap; gap: 8px; }
+  .stats-tile-num { font-size: 1.6rem; }
+}

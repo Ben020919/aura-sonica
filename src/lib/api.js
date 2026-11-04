@@ -85,3 +85,24 @@ export async function apiUpload(path, formData) {
   }
   return data
 }
+
+// 瀏覽統計：每部瀏覽器一個隨機匿名 ID（唔係 IP、唔連帳戶），只用嚟數「幾多個人」。
+const VISITOR_KEY = 'aura.visitor'
+
+function visitorId() {
+  try {
+    let id = localStorage.getItem(VISITOR_KEY)
+    if (!id) {
+      id = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()
+      localStorage.setItem(VISITOR_KEY, id)
+    }
+    return id
+  } catch {
+    return 'anon-' + String(Math.random()).slice(2, 12) // 私隱模式用唔到 localStorage
+  }
+}
+
+// 失敗都唔理（唔可以阻住客人睇網站）
+export function trackPageView(path) {
+  api('/api/track', { method: 'POST', body: { path, visitor: visitorId() }, auth: false }).catch(() => {})
+}

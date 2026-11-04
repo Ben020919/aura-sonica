@@ -197,3 +197,15 @@ class Note(Base):
     nickname = Column(String(120))  # 客人簡稱，可為空
     message = Column(Text, nullable=False)
     created_at = Column(DateTime, default=_utcnow, nullable=False)
+
+
+class PageView(Base):
+    """瀏覽紀錄：客人每開一頁記一行，畀後台「流量」睇瀏覽次數 / 訪客數。
+    visitor 係瀏覽器隨機產生嘅匿名 ID（唔係 IP、唔連帳戶），只用嚟數「幾多個人」。"""
+
+    __tablename__ = "page_views"
+
+    id = Column(Integer, primary_key=True)
+    path = Column(String(200), nullable=False)  # 例：/、/shop、/product/tote-suede
+    visitor = Column(String(40), nullable=False)
+    created_at = Column(DateTime, default=_utcnow, nullable=False, index=True)

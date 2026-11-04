@@ -20,6 +20,11 @@ class NoteIn(BaseModel):
     message: str = Field(min_length=1, max_length=2000)
 
 
+class PageViewIn(BaseModel):
+    path: str = Field(min_length=1, max_length=200)
+    visitor: str = Field(min_length=8, max_length=40)
+
+
 class NoteOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

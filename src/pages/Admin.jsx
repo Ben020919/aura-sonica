@@ -83,6 +83,12 @@ export default function Admin() {
           留言
         </button>
         <button
+          className={tab === 'stats' ? 'active' : ''}
+          onClick={() => setTab('stats')}
+        >
+          流量
+        </button>
+        <button
           className={tab === 'announce' ? 'active' : ''}
           onClick={() => setTab('announce')}
         >
@@ -96,6 +102,8 @@ export default function Admin() {
         <ProductsPanel />
       ) : tab === 'announce' ? (
         <AnnouncePanel />
+      ) : tab === 'stats' ? (
+        <StatsPanel />
       ) : (
         <NotesPanel />
       )}
@@ -613,6 +621,123 @@ function NotesPanel() {
                 </td>
               </tr>
             ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  )
+}
+
+const STATS_RANGES = [
+  { days: 7, label: '7 日' },
+  { days: 30, label: '30 日' },
+  { days: 90, label: '90 日' },
+]
+
+function StatsPanel() {
+  const [days, setDays] = useState(30)
+  const [data, setData] = useState(null)
+  const [err, setErr] = useState('')
+  const [hover, setHover] = useState(null)
+
+  useEffect(() => {
+    setErr('')
+    api('/api/admin/stats?days=' + days).then(setData).catch((e) => setErr(e.message))
+  }, [days])
+
+  if (err) return <p className="admin-err">{err}</p>
+  if (!data) return <p className="muted">載入中…</p>
+
+  const max = Math.max(1, ...data.daily.map((d) => d.views))
+  const shortDate = (iso) => iso.slice(5).replace('-', '/')
+  const tip = hover != null ? data.daily[hover] : null
+
+  return (
+    <>
+      <div className="admin-bar">
+        <div className="admin-filters" style={{ margin: 0 }}>
+          {STATS_RANGES.map((r) => (
+            <button
+              key={r.days}
+              className={'filter-pill' + (days === r.days ? ' active' : '')}
+              onClick={() => setDays(r.days)}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+        <span className="muted">香港時間 · 後台自己唔計</span>
+      </div>
+
+      <div className="stats-tiles">
+        {[
+          ['今日', data.today],
+          ['最近 7 日', data.last7],
+          [`最近 ${data.days} 日`, data.period],
+        ].map(([name, s]) => (
+          <div className="stats-tile" key={name}>
+            <div className="stats-tile-name">{name}</div>
+            <div className="stats-tile-num">{s.views.toLocaleString()}</div>
+            <div className="muted">次瀏覽 · {s.visitors.toLocaleString()} 位訪客</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="stats-chart-card">
+        <div className="stats-chart-head">
+          <strong>每日瀏覽次數</strong>
+          <span className="muted">
+            {tip
+              ? `${tip.date}：${tip.views} 次瀏覽 · ${tip.visitors} 位訪客`
+              : '滑鼠移到（或者撳）棒上睇當日數字'}
+          </span>
+        </div>
+        <div className="stats-chart" onMouseLeave={() => setHover(null)}>
+          {data.daily.map((d, i) => (
+            <div
+              key={d.date}
+              className={'stats-col' + (hover === i ? ' hover' : '')}
+              onMouseEnter={() => setHover(i)}
+              onClick={() => setHover(i)}
+              title={`${d.date}：${d.views} 次瀏覽 · ${d.visitors} 位訪客`}
+            >
+              <div className="stats-bar" style={{ height: `${(d.views / max) * 100}%` }} />
+            </div>
+          ))}
+        </div>
+        <div className="stats-axis">
+          <span>{shortDate(data.daily[0].date)}</span>
+          <span>最高 {max} 次</span>
+          <span>{shortDate(data.daily[data.daily.length - 1].date)}</span>
+        </div>
+      </div>
+
+      <div className="admin-table-wrap">
+        <table className="admin-table" style={{ minWidth: 480 }}>
+          <thead>
+            <tr>
+              <th>最多人睇嘅頁面</th>
+              <th style={{ width: 110, textAlign: 'right' }}>瀏覽次數</th>
+              <th style={{ width: 90, textAlign: 'right' }}>訪客</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.pages.map((p) => (
+              <tr key={p.path}>
+                <td>
+                  {p.label}
+                  <br />
+                  <small className="muted">{p.path}</small>
+                </td>
+                <td style={{ textAlign: 'right' }}>{p.views.toLocaleString()}</td>
+                <td style={{ textAlign: 'right' }}>{p.visitors.toLocaleString()}</td>
+              </tr>
+            ))}
+            {!data.pages.length && (
+              <tr>
+                <td colSpan={3} className="muted">呢段時間仲未有瀏覽紀錄。</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

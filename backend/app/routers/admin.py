@@ -1,5 +1,7 @@
 import io
 import re
+from collections import Counter, defaultdict
+from datetime import date, datetime, timedelta, timezone
 
 from fastapi import (
     APIRouter,
@@ -333,3 +335,91 @@ def delete_note(note_id: int, db: Session = Depends(get_db)):
     db.delete(note)
     db.commit()
     return {"ok": True}
+
+
+# ── 流量（瀏覽次數）────────────────────────────
+HK_TZ = timezone(timedelta(hours=8))
+KEEP_VIEWS_DAYS = 400  # 瀏覽紀錄保留大約一年多，舊嘅自動刪，唔好食爆 Neon 免費 0.5 GB
+
+PAGE_LABELS = {
+    "/": "主頁（忘聲海）",
+    "/about": "About",
+    "/aura": "Aura",
+    "/story": "Story 故事",
+    "/gallery": "Gallery",
+    "/shop": "Store 商店",
+    "/orders": "我的訂單",
+    "/policy": "條款與政策",
+    "/faq": "常見問題",
+}
+
+
+def _hk_date(dt: datetime) -> date:
+    if dt.tzinfo is None:  # DB 存嘅係 UTC（冇時區）
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(HK_TZ).date()
+
+
+@router.get("/stats")
+def traffic_stats(days: int = 30, db: Session = Depends(get_db)):
+    """後台「流量」：最近 N 日每日瀏覽次數 / 訪客數 + 最多人睇嘅頁面（香港時間計）。"""
+    days = max(7, min(days, 90))
+    now = datetime.now(timezone.utc)
+    db.query(models.PageView).filter(
+        models.PageView.created_at < now - timedelta(days=KEEP_VIEWS_DAYS)
+    ).delete(synchronize_session=False)
+    db.commit()
+
+    today = now.astimezone(HK_TZ).date()
+    first_day = today - timedelta(days=days - 1)
+    since = datetime.combine(first_day, datetime.min.time(), HK_TZ).astimezone(timezone.utc)
+    rows = (
+        db.query(models.PageView.path, models.PageView.visitor, models.PageView.created_at)
+        .filter(models.PageView.created_at >= since.replace(tzinfo=None))
+        .all()
+    )
+
+    daily_views: Counter = Counter()
+    daily_visitors: dict[date, set] = defaultdict(set)
+    page_views: Counter = Counter()
+    page_visitors: dict[str, set] = defaultdict(set)
+    for path, visitor, created_at in rows:
+        d = _hk_date(created_at)
+        if d < first_day:
+            continue
+        daily_views[d] += 1
+        daily_visitors[d].add(visitor)
+        page_views[path] += 1
+        page_visitors[path].add(visitor)
+
+    def summary(start: date) -> dict:
+        views = sum(n for d, n in daily_views.items() if d >= start)
+        visitors = set().union(*(v for d, v in daily_visitors.items() if d >= start))
+        return {"views": views, "visitors": len(visitors)}
+
+    names = dict(db.query(models.Product.slug, models.Product.name).all())
+
+    def label(path: str) -> str:
+        if path.startswith("/product/"):
+            slug = path.removeprefix("/product/")
+            return f"產品：{names.get(slug, slug)}"
+        return PAGE_LABELS.get(path, path)
+
+    return {
+        "days": days,
+        "today": summary(today),
+        "last7": summary(today - timedelta(days=6)),
+        "period": summary(first_day),
+        "daily": [
+            {
+                "date": (d := first_day + timedelta(days=i)).isoformat(),
+                "views": daily_views[d],
+                "visitors": len(daily_visitors[d]),
+            }
+            for i in range(days)
+        ],
+        "pages": [
+            {"path": p, "label": label(p), "views": n, "visitors": len(page_visitors[p])}
+            for p, n in page_views.most_common(20)
+        ],
+    }
