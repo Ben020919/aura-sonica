@@ -4,6 +4,7 @@ import Reveal from '../components/Reveal.jsx'
 const WORKS = [
   { src: '/products/gallery-1.jpeg', alt: 'AURA Sonica — 原創畫作' },
   { src: '/products/gallery-2.jpeg', alt: 'AURA Sonica — 原創畫作系列' },
+  { src: '/products/gallery-3.jpeg', alt: 'AURA Sonica — Listen to the wave within' },
 ]
 
 export default function Gallery() {
